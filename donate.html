@@ -30,8 +30,8 @@ li a:hover {
   color: white;
 }
 </style>
-<title>Contact Us</title>
-<META NAME="keywords" CONTENT="    Boston Judaism Sabbath Brookline Newton Brighton Allston Nonantum Sacred Space Synagogue RCCR">
+<title>Donate</title>
+<META NAME="keywords" CONTENT="    ">
 <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GOOGLE_ANALYTICS_ID"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -79,9 +79,10 @@ li a:hover {
 <td colspan="2" valign="top">
 
 <div style="font-family: verdana; font-size: 16px;">
-<b><h1>Contact Us</h1>
+<b><h1>Donate</h1>
+    Donations of cash/check may be given to reb chardle or sent to him. Submitting on this site is a pledge.
 </b>
-<p>Please fill out the form below to get in touch with us.</p>
+<p>Please fill out the form below to donate.</p>
 
 <form name="contact" method="post" data-netlify="true" data-netlify-honeypot="bot-field" action="/success">
   <input type="hidden" name="form-name" value="contact" />
@@ -102,32 +103,24 @@ li a:hover {
   </p>
 
   <p>
-    <label>Inquiry Type:</label><br>
-    <input type="radio" id="question" name="inquiry_type" value="question" required>
-    <label for="question">Question</label><br>
-    <input type="radio" id="Kashrus" name="inquiry_type" value="Kashrus" required>
-    <label for="Kashrus">Kashrus</label><br>
-    <input type="radio" id="General-Message" name="inquiry_type" value="General-Message" required>
-    <label for="General-Message">Other</label>
+    <label>Donation Info:</label><br>
+    <input type="radio" id="check" name="inquiry_type" value="check" required>
+    <label for="check">Check</label><br>
+    <input type="radio" id="cash" name="inquiry_type" value="cash" required>
+    <label for="Kashrus">Cash</label><br>
+    
+  </p>
+
+ 
+
+  <p>
+    <label for="Amount">Amount:</label>
+    <textarea id="Amount" name="Amount" required></textarea>
   </p>
 
   <p>
-    <label for="department">Choose a specific contact at RCCR:</label>
-    <select id="department" name="department">
-      <option value="reb-chardle">Reb Chardle</option>
-      <option value="Deef Shmang"> Deef Shmang  </option>
-      <option value="kashrus">Front Desk</option>
-      <option value="other">Other</option>
-    </select>
-  </p>
-
-  <p>
-    <label for="message">Message:</label>
-    <textarea id="message" name="message" required></textarea>
-  </p>
-
-  <p>
-    <button type="submit">Send Message</button>
+    <button type="submit">Donate</button>
+    Donations of cash/check may be given to reb chardle or sent to him. Submitting on this site is a pledge.
   </p>
 </form>
 </div>

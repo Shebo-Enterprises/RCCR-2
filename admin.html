@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" >
+    <style>
+        table { display: table; border-collapse: separate; border-spacing: 2px; border-color: white; }
+        ul { list-style-type: none; margin: 0; padding: 0; width: 200px; background-color: #ffffff; }
+        li a { display: block; color: #000; padding: 8px 16px; text-decoration: none; font-family: verdana; text-align: left; }
+        li a:hover { background-color: #555; color: white; }
+        body { font-family: verdana; margin:0; padding:0; } /* Added margin/padding reset for body */
+        .container { padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: small; }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="password"],
+        .form-group input[type="url"],
+        .form-group textarea {  }
+        .form-group textarea { min-height: 100px; }
+        .btn { padding: 10px 15px; background-color: #003366; color: white; border: none; cursor: pointer; text-decoration: none; font-family: verdana; font-size:small; }
+        .btn:hover { background-color: #005599; }
+        .news-item { border: 1px solid #eee; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9; overflow: auto; /* handles float */ }
+        .news-item img { max-width: 80px; height: auto; float: left; margin-right: 10px; border: 1px solid #ccc; }
+        .news-item-content { font-size: small; }
+        .news-item-actions { margin-top: 10px; clear: both; } /* Clear float for buttons */
+        .news-item-actions button { margin-right: 5px; font-size: 0.9em; padding: 5px 8px; }
+        h1, h2, h3 { font-family: verdana; }
+        hr { border-color: #0000FF; }
+        #login-section h3 { font-size: 1.2em; margin-bottom: 10px;}
+    </style>
+    <title>Admin - RCCR</title>
+    <META NAME="robots" CONTENT="noindex, nofollow">
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body bgcolor="white">
+    <table width="100%" cellpadding="4" border="0">
+        <tr>
+            <td valign="top" width="75%">
+                <div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River</div>
+            </td>
+            <td valign="right" width="25%">
+                <img style="max-width: 100%; height: auto;" src="Rabbinical Council (1) (1).png" alt="Rabbinical Council Logo">
+            </td>
+        </tr>
+        <tr>
+            <td align="center" colspan="2">
+                <div style="font-family: verdana; font-size:20px; font-weight:bold;">Serving the community</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <hr size="5" style="color: #0000FF">
+            </td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <td width="10%" align="center" valign="top">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="team.html">Vaad</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </td>
+            <td colspan="2" valign="top" class="container">
+                <div style="font-family: verdana; font-size: 16px;">
+                    <h1>Admin Panel</h1>
+
+                    <div id="login-section">
+                        <h3>Admin Login</h3>
+                        <form onsubmit="handleLogin(event)">
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password:</label>
+                                <input type="password" id="password" name="password" required>
+                            </div>
+                            <button type="submit" class="btn">Login</button>
+                            <p id="login-error" style="color: red; font-size: small; margin-top:10px;"></p>
+                        </form>
+                    </div>
+
+                    <div id="news-management-section" style="display: none;">
+                        <hr style="margin: 20px 0;">
+                        <button onclick="handleLogout()" class="btn" style="background-color: #800000; margin-bottom:20px;">Logout</button>
+                        
+                        <h2>Manage News Items</h2>
+                        
+                        <h3>Add New / Edit News Item</h3>
+                        <form id="add-news-form" onsubmit="submitNewsItem(event)">
+                             <input type="hidden" id="editing-news-id" value="">
+                            <div class="form-group">
+                                <label for="news-title">News Title (Bold):</label>
+                                <input type="text" id="news-title" name="news-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="news-snippet">News Snippet (Text after title):</label>
+                                <textarea id="news-snippet" name="news-snippet" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="news-image-url">Image URL (e.g., images/your_image.jpg or full https://... URL):</label>
+                                <input type="text" id="news-image-url" name="news-image-url" placeholder="images/news_placeholder_1.jpg (Optional)">
+                            </div>
+                            <button type="submit" id="submit-news-button" class="btn">Add News Item</button>
+                        </form>
+
+                        <hr style="margin: 30px 0;">
+
+                        <h3>Existing News Items</h3>
+                        <div id="existing-news-list">
+                            <!-- News items will be loaded here by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- FEATURE BOX MANAGEMENT SECTION START -->
+                    <div id="feature-box-management-section" style="display: none; margin-top: 30px;">
+                        <hr style="margin: 20px 0;">
+                        <h2>Manage Feature Boxes</h2>
+
+                        <h3>Add New / Edit Feature Box</h3>
+                        <form id="add-feature-box-form" onsubmit="submitFeatureBox(event)">
+                            <input type="hidden" id="editing-fb-id" value="">
+                            <div class="form-group">
+                                <label for="fb-title">Title:</label>
+                                <input type="text" id="fb-title" name="fb-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-text">Text (use &lt;br&gt; for line breaks):</label>
+                                <textarea id="fb-text" name="fb-text" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-link-text">Link Text (e.g., Donate Today):</label>
+                                <input type="text" id="fb-link-text" name="fb-link-text">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-link-url">Link URL (e.g., # or https://...):</label>
+                                <input type="url" id="fb-link-url" name="fb-link-url">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-image-url">Image URL (Optional):</label>
+                                <input type="text" id="fb-image-url" name="fb-image-url" placeholder="images/placeholder.jpg">
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-background-color">Background Color (e.g., Blue, #00FF00):</label>
+                                <input type="text" id="fb-background-color" name="fb-background-color" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fb-order">Display Order (e.g., 1, 2, 3):</label>
+                                <input type="number" id="fb-order" name="fb-order" required value="1" min="1">
+                            </div>
+                            <button type="submit" id="submit-fb-button" class="btn">Add Feature Box</button>
+                        </form>
+
+                        <hr style="margin: 30px 0;">
+
+                        <h3>Existing Feature Boxes</h3>
+                        <div id="existing-feature-box-list">
+                            <!-- Feature boxes will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <hr size="2" style="color: #0000FF; margin-top: 30px;">
+                <p></p> 
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <font size="-2" face="verdana">Copyright, RCCR , <script>document.write(new Date().getFullYear())</script></font>
+                <br>
+                <p></p>
+                <font face="arial,helvetica,sans-serif" color="#000000" size="-2">Admin Panel Interface</font>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        // Replace this with your actual Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+  authDomain: "rccr-main.firebaseapp.com",
+  projectId: "rccr-main",
+  storageBucket: "rccr-main.firebasestorage.app",
+  messagingSenderId: "221328154434",
+  appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+  measurementId: "G-97BBMTGDR0"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const loginSection = document.getElementById('login-section');
+        const newsManagementSection = document.getElementById('news-management-section');
+        const loginError = document.getElementById('login-error');
+        const addNewsForm = document.getElementById('add-news-form');
+        const newsTitleInput = document.getElementById('news-title');
+        const newsSnippetInput = document.getElementById('news-snippet');
+        const newsImageUrlInput = document.getElementById('news-image-url');
+        const editingNewsIdInput = document.getElementById('editing-news-id');
+        const submitNewsButton = document.getElementById('submit-news-button');
+        const existingNewsList = document.getElementById('existing-news-list');
+
+        // Feature Box Management Elements
+        const featureBoxManagementSection = document.getElementById('feature-box-management-section');
+        const addFeatureBoxForm = document.getElementById('add-feature-box-form');
+        const fbTitleInput = document.getElementById('fb-title');
+        const fbTextInput = document.getElementById('fb-text');
+        const fbLinkTextInput = document.getElementById('fb-link-text');
+        const fbLinkUrlInput = document.getElementById('fb-link-url');
+        const fbImageUrlInput = document.getElementById('fb-image-url');
+        const fbBackgroundColorInput = document.getElementById('fb-background-color');
+        const fbOrderInput = document.getElementById('fb-order');
+        const editingFbIdInput = document.getElementById('editing-fb-id');
+        const submitFbButton = document.getElementById('submit-fb-button');
+        const existingFeatureBoxList = document.getElementById('existing-feature-box-list');
+
+        // Auth state listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                loginSection.style.display = 'none';
+                newsManagementSection.style.display = 'block';
+                featureBoxManagementSection.style.display = 'block';
+                loginError.textContent = '';
+                loadNewsItems();
+                loadFeatureBoxes();
+            } else {
+                loginSection.style.display = 'block';
+                newsManagementSection.style.display = 'none';
+                existingNewsList.innerHTML = ''; // Clear news list on logout
+                addNewsForm.reset(); // Reset form on logout
+                editingNewsIdInput.value = '';
+                submitNewsButton.textContent = 'Add News Item';
+                featureBoxManagementSection.style.display = 'none';
+                existingFeatureBoxList.innerHTML = '';
+                addFeatureBoxForm.reset();
+                editingFbIdInput.value = '';
+                submitFbButton.textContent = 'Add Feature Box';
+            }
+        });
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            loginError.textContent = ''; // Clear previous errors
+
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    console.error("Login error:", error);
+                    loginError.textContent = "Login failed: " + error.message;
+                });
+        }
+
+        function handleLogout() {
+            auth.signOut().catch(error => {
+                console.error("Logout error:", error);
+                alert("Logout failed: " + error.message);
+            });
+        }
+
+        function submitNewsItem(event) {
+            event.preventDefault();
+            const title = newsTitleInput.value.trim();
+            const snippet = newsSnippetInput.value.trim();
+            const imageUrl = newsImageUrlInput.value.trim();
+            const editingId = editingNewsIdInput.value;
+
+            if (!title || !snippet) {
+                alert("Please fill in Title and Snippet fields.");
+                return;
+            }
+
+            const newsData = {
+                title: title,
+                snippet: snippet,
+                imageUrl: imageUrl,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // For new items or to update timestamp on edit
+            };
+
+            let promise;
+            if (editingId) {
+                // Update existing item
+                // If you don't want to update the timestamp on every edit, you can omit it from newsData here.
+                // For example: const updateData = { title, snippet, imageUrl };
+                promise = db.collection("news").doc(editingId).update(newsData);
+            } else {
+                // Add new item
+                promise = db.collection("news").add(newsData);
+            }
+
+            promise.then(() => {
+                addNewsForm.reset();
+                editingNewsIdInput.value = '';
+                submitNewsButton.textContent = 'Add News Item';
+                loadNewsItems(); // Refresh the list
+            }).catch(error => {
+                console.error("Error saving news item: ", error);
+                alert("Error saving news item: " + error.message);
+            });
+        }
+
+        function loadNewsItems() {
+            existingNewsList.innerHTML = '<p>Loading news...</p>';
+            db.collection("news").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+                existingNewsList.innerHTML = ''; // Clear loading/previous items
+                if (querySnapshot.empty) {
+                    existingNewsList.innerHTML = '<p>No news items found. Add one above!</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const news = doc.data();
+                    const newsItemDiv = document.createElement('div');
+                    newsItemDiv.classList.add('news-item');
+                    newsItemDiv.setAttribute('data-id', doc.id); // Store doc.id for easier access
+
+                    // Sanitize output slightly for display (more robust sanitization might be needed for production)
+                    const displayTitle = news.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    const displaySnippet = news.snippet.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+                    const displayImageUrl = news.imageUrl.replace(/"/g, "&quot;");
+
+
+                    newsItemDiv.innerHTML = `
+                        <img src="${displayImageUrl || 'images/news_placeholder_1.jpg'}" alt="News Image">
+                        <div class="news-item-content">
+                            <p><strong>${displayTitle}</strong><br>
+                            ${displaySnippet}</p>
+                            <small><em>Added: ${news.timestamp ? new Date(news.timestamp.seconds * 1000).toLocaleString() : 'N/A'}</em></small>
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="btn" onclick="populateFormForEdit('${doc.id}')">Edit</button>
+                            <button class="btn" onclick="deleteNewsItem('${doc.id}')" style="background-color:#cc0000;">Delete</button>
+                        </div>
+                    `;
+                    existingNewsList.appendChild(newsItemDiv);
+                });
+            }).catch(error => {
+                console.error("Error loading news items: ", error);
+                existingNewsList.innerHTML = '<p>Error loading news items. Check console for details.</p>';
+            });
+        }
+
+        function populateFormForEdit(docId) {
+            db.collection("news").doc(docId).get().then(doc => {
+                if (doc.exists) {
+                    const news = doc.data();
+                    newsTitleInput.value = news.title;
+                    newsSnippetInput.value = news.snippet;
+                    newsImageUrlInput.value = news.imageUrl;
+                    editingNewsIdInput.value = doc.id;
+                    submitNewsButton.textContent = 'Update News Item';
+                    addNewsForm.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Scroll to form
+                } else {
+                    alert("News item not found for editing.");
+                }
+            }).catch(error => {
+                console.error("Error fetching news item for edit: ", error);
+                alert("Error fetching news item for edit: " + error.message);
+            });
+        }
+
+        function deleteNewsItem(docId) {
+            if (confirm('Are you sure you want to delete this news item? This action cannot be undone.')) {
+                db.collection("news").doc(docId).delete()
+                    .then(() => {
+                        loadNewsItems(); // Refresh the list
+                    })
+                    .catch(error => {
+                        console.error("Error deleting news item: ", error);
+                        alert("Error deleting news item: " + error.message);
+                    });
+            }
+        }
+
+        // --- Feature Box Management Functions ---
+
+        function submitFeatureBox(event) {
+            event.preventDefault();
+            const title = fbTitleInput.value.trim();
+            const text = fbTextInput.value.trim(); // User can use <br> for line breaks
+            const linkText = fbLinkTextInput.value.trim();
+            const linkUrl = fbLinkUrlInput.value.trim();
+            const imageUrl = fbImageUrlInput.value.trim();
+            const backgroundColor = fbBackgroundColorInput.value.trim();
+            const order = parseInt(fbOrderInput.value);
+            const editingId = editingFbIdInput.value;
+
+            if (!title || !text || !backgroundColor || isNaN(order)) {
+                alert("Please fill in Title, Text, Background Color, and a valid Order number.");
+                return;
+            }
+
+            const featureBoxData = {
+                title,
+                text,
+                linkText,
+                linkUrl,
+                imageUrl,
+                backgroundColor,
+                order,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            let promise;
+            if (editingId) {
+                promise = db.collection("featureBoxes").doc(editingId).update(featureBoxData);
+            } else {
+                promise = db.collection("featureBoxes").add(featureBoxData);
+            }
+
+            promise.then(() => {
+                addFeatureBoxForm.reset();
+                editingFbIdInput.value = '';
+                submitFbButton.textContent = 'Add Feature Box';
+                loadFeatureBoxes();
+            }).catch(error => {
+                console.error("Error saving feature box: ", error);
+                alert("Error saving feature box: " + (error.message || error)); // Show error message
+            });
+        }
+
+        function loadFeatureBoxes() {
+            existingFeatureBoxList.innerHTML = '<p>Loading feature boxes...</p>';
+            db.collection("featureBoxes").orderBy("order").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+                existingFeatureBoxList.innerHTML = '';
+                if (querySnapshot.empty) {
+                    existingFeatureBoxList.innerHTML = '<p>No feature boxes found. Add one above!</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const fb = doc.data();
+                    const fbItemDiv = document.createElement('div');
+                    fbItemDiv.classList.add('news-item'); // Re-use news-item style for now
+                    fbItemDiv.setAttribute('data-id', doc.id);
+                    fbItemDiv.innerHTML = `
+                        <div class="news-item-content">
+                            <p><strong>Order: ${fb.order} - ${fb.title.replace(/</g, "&lt;")}</strong> (${fb.backgroundColor.replace(/</g, "&lt;")})<br>
+                            <small>${fb.text.substring(0, 100).replace(/</g, "&lt;")}...</small></p>
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="btn" onclick="populateFeatureBoxFormForEdit('${doc.id}')">Edit</button>
+                            <button class="btn" onclick="deleteFeatureBox('${doc.id}')" style="background-color:#cc0000;">Delete</button>
+                        </div>
+                    `;
+                    existingFeatureBoxList.appendChild(fbItemDiv);
+                });
+            }).catch(error => {
+                console.error("Error loading feature boxes: ", error); // Log the full error
+                existingFeatureBoxList.innerHTML = '<p style="color: red;">Error loading feature boxes. Check console for details.</p>'; // Show error message
+            });
+        }
+
+        function populateFeatureBoxFormForEdit(docId) {
+            db.collection("featureBoxes").doc(docId).get().then(doc => {
+                if (doc.exists) {
+                    const fb = doc.data();
+                    fbTitleInput.value = fb.title;
+                    fbTextInput.value = fb.text;
+                    fbLinkTextInput.value = fb.linkText || '';
+                    fbLinkUrlInput.value = fb.linkUrl || '';
+                    fbImageUrlInput.value = fb.imageUrl || '';
+                    fbBackgroundColorInput.value = fb.backgroundColor;
+                    fbOrderInput.value = fb.order;
+                    editingFbIdInput.value = doc.id;
+                    submitFbButton.textContent = 'Update Feature Box';
+                    addFeatureBoxForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }).catch(error => {
+                console.error("Error fetching feature box for edit: ", error); // Log the full error
+                alert("Error fetching feature box for edit: " + (error.message || error)); // Show error message
+            });
+        }
+
+        function deleteFeatureBox(docId) {
+            if (confirm('Are you sure you want to delete this feature box?')) {
+                db.collection("featureBoxes").doc(docId).delete()
+                    .then(() => loadFeatureBoxes())
+                    .catch(error => alert("Error deleting feature box: " + error.message));
+            }
+        }
+    </script>
+</body>
+</html>
