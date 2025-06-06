@@ -86,7 +86,7 @@ li a:hover {
 </b>
 <p>Please fill out the form below to donate.</p>
 
-<form>
+<form name="donation" method="POST" data-netlify="true" action="/success" data-netlify-honeypot="bot-field">
   <input type="hidden" name="form-name" value="donation" />
   <p hidden>
     <label>
@@ -106,8 +106,7 @@ li a:hover {
 
   <p>
     <label>Donation Info:</label><br>
- <br>
-    <input type="radio" id="boopka" name="inquiry_type" value="boopka" required>
+    <input type="radio" id="boopka" name="inquiry_type" value="boopka" required checked> 
     <label for="boopka">Pay now with Boopka</label><br>
   </p>
 
@@ -137,14 +136,16 @@ li a:hover {
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const donationForm = document.forms['donation'];
+    const donationForm = document.forms['donation']; // This will now correctly find the form
 
     if (donationForm) {
       donationForm.addEventListener('submit', function(event) {
         const paymentMethodInput = document.querySelector('input[name="inquiry_type"]:checked');
         
+        // Since "boopka" is the only option and marked as required,
+        // this condition should always be true if the form is valid.
         if (paymentMethodInput && paymentMethodInput.value === 'boopka') {
-          event.preventDefault(); // Prevent default submission
+          event.preventDefault(); // Prevent default Netlify submission
 
           const donorNameInput = document.getElementById('name');
           const amountInput = document.getElementById('Amount');
@@ -164,16 +165,15 @@ li a:hover {
             return;
           }
 
-          // Redirect to boopka.html with query parameters
-          const params = new URLSearchParams({
-            name: donorName,
-            email: donorEmail,
-            amount: donationAmount
-          });
-          window.location.href = 'boopka.html?' + params.toString();
+          // Redirect to boopka.netlify.app/payment.html with query parameters
+          const boopkaUrl = `https://boopka.netlify.app/payment.html?to=donations@rebchardle.org&amount=${encodeURIComponent(donationAmount)}&note=${encodeURIComponent(donorName)}`;
+          window.location.href = boopkaUrl;
         }
-        // For non-Boopka, let the default submission proceed
+        // If other payment methods were present and selected,
+        // the form would submit to Netlify here (due to no event.preventDefault()).
       });
+    } else {
+      console.error("Donation form not found. Check the form's name attribute.");
     }
   });
 </script>
