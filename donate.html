@@ -13,7 +13,7 @@ ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
-  width: 200 px;
+  width: 200px; /* Corrected CSS */
   background-color: #ffffff;
 }
 li a {
@@ -82,7 +82,7 @@ li a:hover {
 
 <div style="font-family: verdana; font-size: 16px;">
 <b><h1>Donate</h1>
-    Donations of cash/check may be given to reb chardle or sent to him. Submitting on this site is a pledge.
+    Donations of cash/check may be given to reb chardle or sent to him. Submitting on this site is a pledge, unless paying with BOOPKA.
 </b>
 <p>Please fill out the form below to donate.</p>
 
@@ -109,11 +109,10 @@ li a:hover {
     <input type="radio" id="check" name="inquiry_type" value="check" required>
     <label for="check">Check</label><br>
     <input type="radio" id="cash" name="inquiry_type" value="cash" required>
-    <label for="Kashrus">Cash</label><br>
-    
+    <label for="cash">Cash</label><br> {/* Corrected label for attribute */}
+    <input type="radio" id="boopka" name="inquiry_type" value="boopka" required>
+    <label for="boopka">Pay now with Boopka</label><br>
   </p>
-
- 
 
   <p>
     <label for="Amount">Amount:</label>
@@ -122,7 +121,6 @@ li a:hover {
 
   <p>
     <button type="submit">Donate</button>
-    Donations of cash/check may be given to reb chardle or sent to him. Submitting on this site is a pledge.
   </p>
 </form>
 </div>
@@ -139,5 +137,41 @@ li a:hover {
 <FONT face=arial,helvetica,sans-serif color=#000000 size="-2">Powered By: Shebo Enterprises <a href="admin.html">Admin Log-in</a></FONT>
 </td></tr>
 </table>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.forms['contact'];
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(event) {
+        const paymentMethodInput = document.querySelector('input[name="inquiry_type"]:checked');
+        
+        if (paymentMethodInput && paymentMethodInput.value === 'boopka') {
+          event.preventDefault(); // Prevent Netlify submission for Boopka
+
+          const donorNameInput = document.getElementById('name');
+          const amountInput = document.getElementById('Amount'); // This is a textarea
+
+          const donorName = donorNameInput ? donorNameInput.value.trim() : '';
+          const donationAmount = amountInput ? amountInput.value.trim() : '';
+
+          if (!donorName || !donationAmount) {
+            alert('Please fill in your Name and Donation Amount before proceeding with Boopka.');
+            return;
+          }
+          // Basic validation for amount to ensure it's a number (or can be parsed as one)
+          if (isNaN(parseFloat(donationAmount)) || !isFinite(donationAmount) || parseFloat(donationAmount) <= 0) {
+            alert('Please enter a valid donation amount.');
+            amountInput.focus();
+            return;
+          }
+
+          const boopkaUrl = `https://boopka.netlify.app/payment.html?to=donations@rebchardle.org&amount=${encodeURIComponent(donationAmount)}&note=${encodeURIComponent(donorName)}`;
+          window.location.href = boopkaUrl;
+        }
+        // If not 'boopka', the form will submit to Netlify as configured in the HTML (action="/success" data-netlify="true").
+      });
+    }
+  });
+</script>
 </body>
 </html>
