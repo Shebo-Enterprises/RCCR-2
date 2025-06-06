@@ -86,8 +86,8 @@ li a:hover {
 </b>
 <p>Please fill out the form below to donate.</p>
 
-<form name="contact" method="post" data-netlify="true" data-netlify-honeypot="bot-field" action="/success">
-  <input type="hidden" name="form-name" value="contact" />
+<form name="donation" method="post" data-netlify="true" data-netlify-honeypot="bot-field" action="/success">
+  <input type="hidden" name="form-name" value="donation" />
   <p hidden>
     <label>
       Don't fill this out: <input name="bot-field" />
@@ -140,9 +140,9 @@ li a:hover {
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const contactForm = document.forms['contact'];
-    if (contactForm) {
-      contactForm.addEventListener('submit', function(event) {
+    const donationForm = document.forms['donation']; // Changed to 'donation' to match the updated form name
+    if (donationForm) {
+      donationForm.addEventListener('submit', function(event) {
         const paymentMethodInput = document.querySelector('input[name="inquiry_type"]:checked');
         
         if (paymentMethodInput && paymentMethodInput.value === 'boopka') {
