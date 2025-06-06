@@ -140,22 +140,26 @@ li a:hover {
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const donationForm = document.forms['donation']; // Changed to 'donation' to match the updated form name
+    const donationForm = document.forms['donation'];
+    const originalAction = donationForm.action; // Store original action for Netlify
+
     if (donationForm) {
       donationForm.addEventListener('submit', function(event) {
         const paymentMethodInput = document.querySelector('input[name="inquiry_type"]:checked');
         
         if (paymentMethodInput && paymentMethodInput.value === 'boopka') {
-          event.preventDefault(); // Prevent Netlify submission for Boopka
+          event.preventDefault(); // Prevent default submission to Netlify/original action
 
           const donorNameInput = document.getElementById('name');
-          const amountInput = document.getElementById('Amount'); // This is a textarea
+          const amountInput = document.getElementById('Amount');
+          const emailInput = document.getElementById('email'); // Email is usually needed by FormSubmit
 
           const donorName = donorNameInput ? donorNameInput.value.trim() : '';
           const donationAmount = amountInput ? amountInput.value.trim() : '';
+          const donorEmail = emailInput ? emailInput.value.trim() : '';
 
-          if (!donorName || !donationAmount) {
-            alert('Please fill in your Name and Donation Amount before proceeding with Boopka.');
+          if (!donorName || !donorEmail || !donationAmount) {
+            alert('Please fill in your Name, Email, and Donation Amount before proceeding with Boopka.');
             return;
           }
           // Basic validation for amount to ensure it's a number (or can be parsed as one)
@@ -164,11 +168,40 @@ li a:hover {
             amountInput.focus();
             return;
           }
+          
+          // Set form action to FormSubmit for Boopka
+          donationForm.action = 'https://formsubmit.co/shayatzvi@gmail.com';
+          // Add a hidden input for FormSubmit to redirect after submission (optional)
+          let nextInput = donationForm.querySelector('input[name="_next"]');
+          if (!nextInput) {
+            nextInput = document.createElement('input');
+            nextInput.type = 'hidden';
+            nextInput.name = '_next';
+            donationForm.appendChild(nextInput);
+          }
+          nextInput.value = window.location.origin + '/success.html'; // Or your desired success page for Boopka
 
-          const boopkaUrl = `https://boopka.netlify.app/payment.html?to=donations@rebchardle.org&amount=${encodeURIComponent(donationAmount)}&note=${encodeURIComponent(donorName)}`;
-          window.location.href = boopkaUrl;
+          // Add a hidden input for the subject (optional)
+          let subjectInput = donationForm.querySelector('input[name="_subject"]');
+          if(!subjectInput) {
+            subjectInput = document.createElement('input');
+            subjectInput.type = 'hidden';
+            subjectInput.name = '_subject';
+            donationForm.appendChild(subjectInput);
+          }
+          subjectInput.value = `New Boopka Donation from ${donorName}`;
+          
+          donationForm.submit(); // Submit the form to FormSubmit
+        } else {
+          // For non-Boopka, ensure the action is set back to Netlify's /success (or original)
+          donationForm.action = originalAction; 
+          // Remove FormSubmit specific hidden inputs if they were added
+          const nextInput = donationForm.querySelector('input[name="_next"]');
+          if (nextInput) nextInput.remove();
+          const subjectInput = donationForm.querySelector('input[name="_subject"]');
+          if (subjectInput) subjectInput.remove();
+          // And let the default Netlify submission proceed (no event.preventDefault() here)
         }
-        // If not 'boopka', the form will submit to Netlify as configured in the HTML (action="/success" data-netlify="true").
       });
     }
   });
