@@ -86,7 +86,7 @@ li a:hover {
 </b>
 <p>Please fill out the form below to donate.</p>
 
-<form name="donation" method="post" data-netlify="true" data-netlify-honeypot="bot-field" action="/success">
+<form name="donation" method="post" data-netlify="true" data-netlify-honeypot="bot-field">
   <input type="hidden" name="form-name" value="donation" />
   <p hidden>
     <label>
@@ -170,7 +170,7 @@ li a:hover {
           }
           
           // Set form action to FormSubmit for Boopka
-          donationForm.action = 'https://formsubmit.co/shayatzvi@gmail.com';
+          
           // Add a hidden input for FormSubmit to redirect after submission (optional)
           let nextInput = donationForm.querySelector('input[name="_next"]');
           if (!nextInput) {
