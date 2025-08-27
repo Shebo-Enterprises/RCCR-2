@@ -73,14 +73,8 @@ li a:hover {
 </tr>
 <tr>
 <td width="10%" align="center" valign="top">
-<ul>
- <li><a href="#">Home</a></li>
- <li><a href="team.html">Vaad</a></li>
- <li><a href="subsidy.html">KRCKA Subsidy</a></li>
- <li><a href="parnes-hashvua.html">Parnes Hashvua</a></li>
- <li><a href="kosher.html">Kosher establishments list</a></li>
- <li><a href="contact.html">Contact</a></li>
-
+<ul id="sidebar-links">
+  <!-- Links loaded from Firebase -->
 </ul>
 </td>
 <td colspan="2">
@@ -173,6 +167,32 @@ Need our physical street mailing address? Use the Contact Link to the left...
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
+
+    function renderSidebarLinks() {
+        const ul = document.getElementById('sidebar-links');
+        if (!ul) return;
+        ul.innerHTML = '<li>Loading...</li>';
+        db.collection('links').orderBy('order').get().then(qs => {
+            ul.innerHTML = '';
+            if (qs.empty) {
+                ul.innerHTML = '<li><a href="index.html">Home</a></li>';
+                return;
+            }
+            qs.forEach(doc => {
+                const l = doc.data();
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = l.text;
+                a.href = l.url;
+                if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        }).catch(err => {
+            console.error('Error loading links:', err);
+            ul.innerHTML = '<li>Error loading links</li>';
+        });
+    }
 
     function loadPublicFeatureBoxes() {
         const containerRow = document.getElementById('feature-box-container-row');
@@ -269,6 +289,7 @@ Need our physical street mailing address? Use the Contact Link to the left...
 
     // Load news when the page is ready
     document.addEventListener('DOMContentLoaded', function() {
+        renderSidebarLinks();
         loadPublicNews();
         loadPublicFeatureBoxes();
     });

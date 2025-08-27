@@ -40,25 +40,27 @@ li a:hover {
 
   gtag('config', 'YOUR_GOOGLE_ANALYTICS_ID');
 </script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body bgcolor="white">
 <table width="100%" cellpadding="4" border="0">
 <tr>
-	<td valign="top" width="75%">
-		<div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River   </div>
-	</td>
+    <td valign="top" width="75%">
+        <div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River    </div>
+    </td>
     <td valign="right" width="25%">
         <img style="max-width: 100%; height: auto;" src="Rabbinical Council (1) (1).png" alt="Rabbinical Council Logo">
     </td>
 <tr>
-	<td align="center" colspan="2">
-		<div style="font-family: verdana; font-size:20px; font-weight:bold; width=300px;">Serving the community</div>
-	</td>
+    <td align="center" colspan="2">
+        <div style="font-family: verdana; font-size:20px; font-weight:bold; width=300px;">Serving the community</div>
+    </td>
 </tr>
 <tr>
-	<td colspan="2">
-		<hr size="5" style="color: #0000FF">
-	</td>
+    <td colspan="2">
+        <hr size="5" style="color: #0000FF">
+    </td>
 </tr>
 </table>
 <table>
@@ -68,36 +70,70 @@ li a:hover {
 </tr>
 <tr>
 <td width="10%" align="center" valign="top">
-<ul>
- <li><a href="index.html">Home</a></li>
- <li><a href="team.html">Vaad</a></li>
- <li><a href="subsidy.html">KRCKA Subsidy</a></li>
- <li><a href="parnes-hashvua.html">Parnes Hashvua</a></li>
- <li><a href="kosher.html">Kosher establishments list</a></li>
- <li><a href="contact.html">Contact</a></li>
- 
-
-</ul>
+<ul id="sidebar-links">
+  </ul>
 </td>
 <td colspan="2" valign="top">
 
 <div style="font-family: verdana; font-size: 16px;">
 <b><h1>Parnes Hashvuas</h1>
 </b> <p><a href="parneshashvuasponsor.html">Click Here to sponsor a week</a></p>
-<iframe src="https://kiddushware.netlify.app/app/public-display.html?configId=Pqkf3g3ym0jSbMpo9dGC" width="100%" height="600px" style="border:1px solid #ccc;"></iframe>
+<iframe src="https://kiddushware.netlify.app/app/public-display.html?configId=Pqkf3WfF4t2T9hRz98s1&token=K_U0MDU4V0tKSlZUMUowUTlHT1VaNVc4OEVaUVVUTkU" width="100%" height="800px" style="border:none;"></iframe>
 </div>
 </td>
 </tr>
 </table>
 <hr size="2" style="color: #0000FF">
 <p>
-</td>
-</tr>
-<tr><td colspan="3"><font size="-2" face="verdana">Copyright, RCCR  <script>document.write(new Date().getFullYear())</script></font>
-<br>
-<p>
-<FONT face=arial,helvetica,sans-serif color=#000000 size="-2">Powered By: Shebo Enterprises <a href="admin.html">Admin Log-in</a></FONT>
-</td></tr>
-</table>
+<font size="-2" face="verdana" >
+Rabbinical Council of The Charles River - info@rebchardle.org
+</font>
+<script>
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+  authDomain: "rccr-main.firebaseapp.com",
+  projectId: "rccr-main",
+  storageBucket: "rccr-main.firebasestorage.app",
+  messagingSenderId: "221328154434",
+  appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+  measurementId: "G-97BBMTGDR0"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function renderSidebarLinks() {
+        const ul = document.getElementById('sidebar-links');
+        if (!ul) {
+            console.error('Sidebar links UL not found!');
+            return;
+        }
+        // Always include a Home link as the first item
+        ul.innerHTML = '<li><a href=\"index.html\">Home</a></li>'; 
+        
+        db.collection('sidebarLinks').orderBy('order').get().then(qs => {
+            if (qs.empty) {
+                return;
+            }
+            qs.forEach(doc => {
+                const l = doc.data();
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = l.text;
+                a.href = l.url;
+                if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        }).catch(err => {
+            console.error('Error loading links:', err);
+            ul.innerHTML = '<li>Error loading links</li>';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderSidebarLinks);
+</script>
 </body>
 </html>

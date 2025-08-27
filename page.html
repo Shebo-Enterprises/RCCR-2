@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" >
+    <style>
+        table { display: table; border-collapse: separate; border-spacing: 2px; border-color: white; }
+        ul { list-style-type: none; margin: 0; padding: 0; width: 200px; background-color: #ffffff; }
+        li a { display: block; color: #000; padding: 8px 16px; text-decoration: none; font-family: verdana; text-align: left; }
+        li a:hover { background-color: #555; color: white; }
+        body { font-family: verdana; margin:0; padding:0; }
+    </style>
+    <title>RCCR Page</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body bgcolor="white">
+<table width="100%" cellpadding="4" border="0">
+    <tr>
+        <td valign="top" width="75%">
+            <div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River</div>
+        </td>
+        <td valign="right" width="25%">
+            <img style="max-width: 100%; height: auto;" src="Rabbinical Council (1) (1).png" alt="Rabbinical Council Logo">
+        </td>
+    </tr>
+    <tr>
+        <td align="center" colspan="2">
+            <div style="font-family: verdana; font-size:20px; font-weight:bold;">Serving the community</div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <hr size="5" style="color: #0000FF">
+        </td>
+    </tr>
+</table>
+<table>
+<tr>
+    <td width="10%" align="center" valign="top">
+        <ul id="sidebar-links">
+            <!-- Links loaded from Firebase -->
+        </ul>
+    </td>
+    <td colspan="2" valign="top">
+        <div style="font-family: verdana; font-size: 16px;">
+            <h1 id="page-title">Loading...</h1>
+            <div id="page-content"></div>
+        </div>
+    </td>
+</tr>
+<tr>
+    <td colspan="3">
+        <hr size="2" style="color: #0000FF">
+        <font size="-2" face="verdana">Copyright, RCCR , <script>document.write(new Date().getFullYear())</script></font>
+        <br>
+        <font face="arial,helvetica,sans-serif" color="#000000" size="-2">Powered By: Shebo Enterprises <a href="admin.html">Admin Log-in</a></font>
+    </td>
+</tr>
+</table>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+    authDomain: "rccr-main.firebaseapp.com",
+    projectId: "rccr-main",
+    storageBucket: "rccr-main.firebasestorage.app",
+    messagingSenderId: "221328154434",
+    appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+    measurementId: "G-97BBMTGDR0"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  function getParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name) || '';
+  }
+
+  function renderLinks() {
+    const ul = document.getElementById('sidebar-links');
+    ul.innerHTML = '<li>Loading...</li>';
+    db.collection('links').orderBy('order').get().then(qs => {
+      ul.innerHTML = '';
+      if (qs.empty) {
+        ul.innerHTML = '<li><a href="index.html">Home</a></li>';
+        return;
+      }
+      qs.forEach(doc => {
+        const l = doc.data();
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.textContent = l.text;
+        a.href = l.url;
+        if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }).catch(err => {
+      console.error('Error loading links:', err);
+      ul.innerHTML = '<li>Error loading links</li>';
+    });
+  }
+
+  function renderPage() {
+    const slug = getParam('slug');
+    const titleEl = document.getElementById('page-title');
+    const contentEl = document.getElementById('page-content');
+    titleEl.textContent = 'Loading...';
+    contentEl.innerHTML = '';
+    if (!slug) { titleEl.textContent = 'Page not found'; return; }
+    db.collection('pages').where('slug','==',slug).limit(1).get().then(qs => {
+      if (qs.empty) { titleEl.textContent = 'Page not found'; return; }
+      const page = qs.docs[0].data();
+      titleEl.textContent = page.title || slug;
+      contentEl.innerHTML = page.contentHtml || '';
+    }).catch(err => {
+      console.error('Error loading page:', err);
+      titleEl.textContent = 'Error loading page';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    renderLinks();
+    renderPage();
+  });
+</script>
+</body>
+</html>

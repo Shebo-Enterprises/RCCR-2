@@ -40,6 +40,8 @@ li a:hover {
 
   gtag('config', 'YOUR_GOOGLE_ANALYTICS_ID');
 </script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body bgcolor="white">
 <table width="100%" cellpadding="4" border="0">
@@ -63,86 +65,74 @@ li a:hover {
 </table>
 <table>
 <tr><td colspan="3" align="right"><font size="-1" face="Arial">
-
 </font></td>
 </tr>
 <tr>
 <td width="10%" align="center" valign="top">
-<ul>
-  <li><a href="index.html">Home</a></li>
-  <li><a href="team.html">Vaad</a></li>
-  <li><a href="subsidy.html">KRCKA Subsidy</a></li>
-    <li><a href="parnes-hashvua.html">Parnes Hashvua</a></li>
-    <li><a href="kosher.html">Kosher establishments list</a></li>
-  <li><a href="contact.html">Contact</a></li>
-
-
-</ul>
+<ul id="sidebar-links">
+  </ul>
 </td>
 <td colspan="2" valign="top">
-
 <div style="font-family: verdana; font-size: 16px;">
-
-    <h1>Kosher establishments list</h1>
-    <p>From the KRCKA website</p>
-<iframe src="https://krcka.rebchardle.org/client-view.html" width="100%" height="1000px" frameborder="0"></iframe>
+<b><h1>Kosher</h1>
+</b>
+<p>The Rabbinical Council of the Charles River oversees the kosher status of a number of establishments. For more information, please visit our dedicated Kosher site: </p>
+<p>
+<b><a href="https://kosher.rebchardle.org" target="_blank">kosher.rebchardle.org</a></b>
+</p>
+<p>
+<br>
 </div>
 </td>
 </tr>
 </table>
-<hr size="2" style="color: #0000FF">
-<p>
-</td>
-</tr>
-<tr><td colspan="3"><font size="-2" face="verdana">Copyright, RCCR    , <script>document.write(new Date().getFullYear())</script></font>
-<br>
-<p>
-<FONT face=arial,helvetica,sans-serif color=#000000 size="-2">Powered By: Shebo Enterprises <a href="admin.html">Admin Log-in</a></FONT>
-</td></tr>
-</table>
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const donationForm = document.forms['donation']; // This will now correctly find the form
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+        // YOUR FIREBASE CONFIG
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+  authDomain: "rccr-main.firebaseapp.com",
+  projectId: "rccr-main",
+  storageBucket: "rccr-main.firebasestorage.app",
+  messagingSenderId: "221328154434",
+  appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+  measurementId: "G-97BBMTGDR0"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    if (donationForm) {
-      donationForm.addEventListener('submit', function(event) {
-        const paymentMethodInput = document.querySelector('input[name="inquiry_type"]:checked');
-        
-        // Since "boopka" is the only option and marked as required,
-        // this condition should always be true if the form is valid.
-        if (paymentMethodInput && paymentMethodInput.value === 'boopka') {
-          event.preventDefault(); // Prevent default Netlify submission
-
-          const donorNameInput = document.getElementById('name');
-          const amountInput = document.getElementById('Amount');
-          const emailInput = document.getElementById('email');
-
-          const donorName = donorNameInput ? donorNameInput.value.trim() : '';
-          const donationAmount = amountInput ? amountInput.value.trim() : '';
-          const donorEmail = emailInput ? emailInput.value.trim() : '';
-
-          if (!donorName || !donorEmail || !donationAmount) {
-            alert('Please fill in your Name, Email, and Donation Amount before proceeding with Boopka.');
+    function renderSidebarLinks() {
+        const ul = document.getElementById('sidebar-links');
+        if (!ul) {
+            console.error('Sidebar links UL not found!');
             return;
-          }
-          if (isNaN(parseFloat(donationAmount)) || !isFinite(donationAmount) || parseFloat(donationAmount) <= 0) {
-            alert('Please enter a valid donation amount.');
-            amountInput.focus();
-            return;
-          }
-
-          // Redirect to boopka.netlify.app/payment.html with query parameters
-          const boopkaUrl = `https://boopka.netlify.app/payment.html?to=donations@rebchardle.org&amount=${encodeURIComponent(donationAmount)}&note=${encodeURIComponent(donorName)}`;
-          window.location.href = boopkaUrl;
         }
-        // If other payment methods were present and selected,
-        // the form would submit to Netlify here (due to no event.preventDefault()).
-      });
-    } else {
-      console.error("Donation form not found. Check the form's name attribute.");
+        // Always include a Home link as the first item
+        ul.innerHTML = '<li><a href=\"index.html\">Home</a></li>'; 
+        
+        db.collection('sidebarLinks').orderBy('order').get().then(qs => {
+            if (qs.empty) {
+                return;
+            }
+            qs.forEach(doc => {
+                const l = doc.data();
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = l.text;
+                a.href = l.url;
+                if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        }).catch(err => {
+            console.error('Error loading links:', err);
+            ul.innerHTML = '<li>Error loading links</li>';
+        });
     }
-  });
+
+    document.addEventListener('DOMContentLoaded', renderSidebarLinks);
 </script>
 </body>
 </html>

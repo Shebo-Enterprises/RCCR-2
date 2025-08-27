@@ -27,12 +27,14 @@
         h1, h2, h3 { font-family: verdana; }
         hr { border-color: #0000FF; }
         #login-section h3 { font-size: 1.2em; margin-bottom: 10px;}
+        /* ADDED BORDER STYLE FOR EDITABLE TABLES */
+        #page-editor table, #page-editor th, #page-editor td {
+            border: 1px solid #ccc !important;
+        }
     </style>
     <title>Admin - RCCR</title>
     <META NAME="robots" CONTENT="noindex, nofollow">
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <!-- Add Firebase products that you want to use -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
@@ -118,11 +120,9 @@
 
                         <h3>Existing News Items</h3>
                         <div id="existing-news-list">
-                            <!-- News items will be loaded here by JavaScript -->
-                        </div>
+                            </div>
                     </div>
 
-                    <!-- FEATURE BOX MANAGEMENT SECTION START -->
                     <div id="feature-box-management-section" style="display: none; margin-top: 30px;">
                         <hr style="margin: 20px 0;">
                         <h2>Manage Feature Boxes</h2>
@@ -165,10 +165,91 @@
 
                         <h3>Existing Feature Boxes</h3>
                         <div id="existing-feature-box-list">
-                            <!-- Feature boxes will be loaded here -->
-                        </div>
+                            </div>
                     </div>
-                </div>
+
+                    <div id="links-management-section" style="display: none; margin-top: 30px;">
+                        <hr style="margin: 20px 0;">
+                        <h2>Manage Sidebar Links</h2>
+
+                        <h3>Add New / Edit Link</h3>
+                        <form id="add-link-form" onsubmit="submitLink(event)">
+                            <input type="hidden" id="editing-link-id" value="">
+                            <div class="form-group">
+                                <label for="link-text">Link Text:</label>
+                                <input type="text" id="link-text" name="link-text" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="link-url">Link URL (e.g., index.html or https://...):</label>
+                                <input type="text" id="link-url" name="link-url" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="link-order">Display Order (1, 2, 3...):</label>
+                                <input type="number" id="link-order" name="link-order" required value="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" id="link-target-blank"> Open in new tab</label>
+                            </div>
+                            <button type="submit" id="submit-link-button" class="btn">Add Link</button>
+                        </form>
+
+                        <hr style="margin: 30px 0;">
+
+                        <h3>Existing Links</h3>
+                        <div id="existing-links-list">
+                            </div>
+                    </div>
+                    <div id="pages-management-section" style="display: none; margin-top: 30px;">
+                        <hr style="margin: 20px 0;">
+                        <h2>Manage Pages</h2>
+
+                        <h3>Create New / Edit Page</h3>
+                        <form id="add-page-form" onsubmit="submitPage(event)">
+                            <input type="hidden" id="editing-page-id" value="">
+                            <div class="form-group">
+                                <label for="page-slug">Slug (used in URL, e.g., about):</label>
+                                <input type="text" id="page-slug" name="page-slug" required pattern="[a-z0-9\-]+" title="lowercase letters, numbers, and hyphens only">
+                            </div>
+                            <div class="form-group">
+                                <label for="page-title">Title:</label>
+                                <input type="text" id="page-title" name="page-title" required>
+                            </div>
+
+                            <div class="form-group">
+                                <div id="editor-toolbar">
+                                    <button type="button" class="btn" onclick="editorCmd('bold')"><b>B</b></button>
+                                    <button type="button" class="btn" onclick="editorCmd('italic')"><i>I</i></button>
+                                    <button type="button" class="btn" onclick="editorCmd('underline')"><u>U</u></button>
+                                    <select id="font-size-select" onchange="applyFontSize(this.value)" class="btn" style="background:#eee; color:#000;">
+                                        <option value="">Font size</option>
+                                        <option value="12px">12</option>
+                                        <option value="14px">14</option>
+                                        <option value="16px">16</option>
+                                        <option value="18px">18</option>
+                                        <option value="24px">24</option>
+                                        <option value="32px">32</option>
+                                    </select>
+                                    <button type="button" class="btn" onclick="insertImageByUrl()">Image URL</button>
+                                    <button type="button" class="btn" onclick="insertTablePrompt()">Table</button>
+                                    <button type="button" class="btn" onclick="insertHtmlEmbed()">Embed HTML</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Content:</label>
+                                <div id="page-editor" contenteditable="true" style="min-height:220px; padding:10px; border:1px solid #ccc; font-family:verdana; font-size:14px; background:#fff;"></div>
+                            </div>
+
+                            <button type="submit" id="submit-page-button" class="btn">Save Page</button>
+                        </form>
+
+                        <hr style="margin: 30px 0;">
+
+                        <h3>Existing Pages</h3>
+                        <div id="existing-pages-list">
+                            </div>
+                    </div>
+                    </div>
                 <hr size="2" style="color: #0000FF; margin-top: 30px;">
                 <p></p> 
             </td>
@@ -233,9 +314,13 @@
                 loginSection.style.display = 'none';
                 newsManagementSection.style.display = 'block';
                 featureBoxManagementSection.style.display = 'block';
+                document.getElementById('links-management-section').style.display = 'block';
+                document.getElementById('pages-management-section').style.display = 'block';
                 loginError.textContent = '';
                 loadNewsItems();
                 loadFeatureBoxes();
+                loadLinks();
+                loadPages();
             } else {
                 loginSection.style.display = 'block';
                 newsManagementSection.style.display = 'none';
@@ -248,6 +333,16 @@
                 addFeatureBoxForm.reset();
                 editingFbIdInput.value = '';
                 submitFbButton.textContent = 'Add Feature Box';
+                document.getElementById('links-management-section').style.display = 'none';
+                document.getElementById('existing-links-list').innerHTML = '';
+                document.getElementById('add-link-form').reset();
+                document.getElementById('editing-link-id').value = '';
+                document.getElementById('submit-link-button').textContent = 'Add Link';
+                document.getElementById('pages-management-section').style.display = 'none';
+                document.getElementById('existing-pages-list').innerHTML = '';
+                document.getElementById('add-page-form').reset();
+                document.getElementById('editing-page-id').value = '';
+                document.getElementById('submit-page-button').textContent = 'Save Page';
             }
         });
 
@@ -382,6 +477,278 @@
                         alert("Error deleting news item: " + error.message);
                     });
             }
+        }
+
+        // --- Links Management Functions ---
+        const addLinkForm = document.getElementById('add-link-form');
+        const linkTextInput = document.getElementById('link-text');
+        const linkUrlInput = document.getElementById('link-url');
+        const linkOrderInput = document.getElementById('link-order');
+        const linkTargetBlankInput = document.getElementById('link-target-blank');
+        const editingLinkIdInput = document.getElementById('editing-link-id');
+        const submitLinkButton = document.getElementById('submit-link-button');
+        const existingLinksList = document.getElementById('existing-links-list');
+
+        function submitLink(event) {
+            event.preventDefault();
+            const text = linkTextInput.value.trim();
+            const url = linkUrlInput.value.trim();
+            const order = parseInt(linkOrderInput.value);
+            const targetBlank = !!linkTargetBlankInput.checked;
+            const editingId = editingLinkIdInput.value;
+
+            if (!text || !url || isNaN(order)) {
+                alert('Please fill in Link Text, URL, and Order.');
+                return;
+            }
+
+            const data = { text, url, order, targetBlank };
+            let p;
+            if (editingId) p = db.collection('links').doc(editingId).update(data);
+            else p = db.collection('links').add(data);
+
+            p.then(() => {
+                addLinkForm.reset();
+                editingLinkIdInput.value = '';
+                submitLinkButton.textContent = 'Add Link';
+                loadLinks();
+            }).catch(err => {
+                console.error('Error saving link:', err);
+                alert('Error saving link: ' + (err.message || err));
+            });
+        }
+
+        function loadLinks() {
+            existingLinksList.innerHTML = '<p>Loading links...</p>';
+            db.collection('links').orderBy('order').get().then(qs => {
+                existingLinksList.innerHTML = '';
+                if (qs.empty) {
+                    existingLinksList.innerHTML = '<p>No links found. Add one above!</p>';
+                    return;
+                }
+                qs.forEach(doc => {
+                    const l = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'news-item';
+                    div.innerHTML = `
+                        <div class="news-item-content">
+                            <p><strong>Order: ${l.order} - ${l.text.replace(/</g,'&lt;')}</strong><br>
+                            <small>${l.url.replace(/</g,'&lt;')}</small> ${l.targetBlank ? '(new tab)' : ''}</p>
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="btn" onclick="populateLinkFormForEdit('${doc.id}')">Edit</button>
+                            <button class="btn" onclick="deleteLink('${doc.id}')" style="background-color:#cc0000;">Delete</button>
+                        </div>
+                    `;
+                    existingLinksList.appendChild(div);
+                });
+            }).catch(err => {
+                console.error('Error loading links:', err);
+                existingLinksList.innerHTML = '<p style="color:red;">Error loading links.</p>';
+            });
+        }
+
+        function populateLinkFormForEdit(id) {
+            db.collection('links').doc(id).get().then(doc => {
+                if (!doc.exists) return alert('Link not found');
+                const l = doc.data();
+                linkTextInput.value = l.text;
+                linkUrlInput.value = l.url;
+                linkOrderInput.value = l.order;
+                linkTargetBlankInput.checked = !!l.targetBlank;
+                editingLinkIdInput.value = doc.id;
+                submitLinkButton.textContent = 'Update Link';
+                addLinkForm.scrollIntoView({behavior:'smooth', block:'start'});
+            }).catch(err => alert('Error fetching link: ' + (err.message || err)));
+        }
+
+        function deleteLink(id) {
+            if (!confirm('Delete this link?')) return;
+            db.collection('links').doc(id).delete().then(loadLinks).catch(err => alert('Error deleting link: ' + (err.message || err)));
+        }
+
+        // --- Pages Management Functions ---
+        const addPageForm = document.getElementById('add-page-form');
+        const pageSlugInput = document.getElementById('page-slug');
+        const pageTitleInput = document.getElementById('page-title');
+        const pageEditor = document.getElementById('page-editor');
+        const editingPageIdInput = document.getElementById('editing-page-id');
+        const submitPageButton = document.getElementById('submit-page-button');
+        const existingPagesList = document.getElementById('existing-pages-list');
+
+        // Minimal rich-text helpers without color controls
+        function editorCmd(cmd) {
+            document.execCommand(cmd, false, null);
+        }
+        function applyFontSize(px) {
+            if (!px) return;
+            // Wrap selection in span with inline font-size
+            document.execCommand('fontSize', false, 7); // use largest then replace with span
+            const editor = pageEditor;
+            const fonts = editor.querySelectorAll('font[size="7"]');
+            fonts.forEach(f => {
+                const span = document.createElement('span');
+                span.style.fontSize = px;
+                span.innerHTML = f.innerHTML;
+                f.parentNode.replaceChild(span, f);
+            });
+        }
+        function insertImageByUrl() {
+            const url = prompt('Image URL:');
+            if (!url) return;
+            document.execCommand('insertImage', false, url);
+        }
+        function insertTablePrompt() {
+            const rows = parseInt(prompt('Rows:', '2') || '2', 10);
+            const cols = parseInt(prompt('Columns:', '2') || '2', 10);
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) return;
+            let html = '<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse; width:100%; border: 1px solid #ccc;">';
+            for (let r = 0; r < rows; r++) {
+                html += '<tr>';
+                for (let c = 0; c < cols; c++) html += '<td>&nbsp;</td>';
+                html += '</tr>';
+            }
+            html += '</table>';
+            insertHtmlAtCursor(html);
+        }
+        function insertHtmlEmbed() {
+            const code = prompt('Paste HTML to embed (sanitized minimally):');
+            if (!code) return;
+            insertHtmlAtCursor(code);
+        }
+        function insertHtmlAtCursor(html) {
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) { pageEditor.insertAdjacentHTML('beforeend', html); return; }
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const frag = document.createDocumentFragment();
+            let node; while ((node = temp.firstChild)) frag.appendChild(node);
+            range.insertNode(frag);
+        }
+        
+        // --- NEW CODE FOR TABLE ROW INSERTION ---
+        pageEditor.addEventListener('keydown', function(event) {
+            // Check for Enter key press
+            if (event.key === 'Enter') {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const currentNode = range.commonAncestorContainer;
+                    
+                    // Find the parent cell (td or th)
+                    const cell = currentNode.closest('td, th');
+                    if (cell) {
+                        event.preventDefault(); // Prevent the default behavior (new line)
+                        
+                        // Find the parent row (tr)
+                        const row = cell.closest('tr');
+                        if (row) {
+                            const table = row.closest('table');
+                            const numCols = row.cells.length;
+                            
+                            // Create a new row
+                            const newRow = document.createElement('tr');
+                            for (let i = 0; i < numCols; i++) {
+                                const newCell = document.createElement('td');
+                                newCell.innerHTML = '&nbsp;'; // Add a non-breaking space to make it visible and selectable
+                                newRow.appendChild(newCell);
+                            }
+                            
+                            // Insert the new row after the current one
+                            row.parentNode.insertBefore(newRow, row.nextSibling);
+                            
+                            // Set focus to the first cell of the new row
+                            const newRange = document.createRange();
+                            const newSelection = window.getSelection();
+                            newRange.selectNodeContents(newRow.cells[0]);
+                            newRange.collapse(false); // Collapse to the end
+                            newSelection.removeAllRanges();
+                            newSelection.addRange(newRange);
+                        }
+                    }
+                }
+            }
+        });
+        // --- END OF NEW CODE ---
+
+        function submitPage(event) {
+            event.preventDefault();
+            const slug = pageSlugInput.value.trim();
+            const title = pageTitleInput.value.trim();
+            const contentHtml = pageEditor.innerHTML; // store as HTML
+            const editingId = editingPageIdInput.value;
+            if (!slug || !title) return alert('Slug and Title are required.');
+            const data = {
+                slug,
+                title,
+                contentHtml,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            let p;
+            if (editingId) p = db.collection('pages').doc(editingId).update(data);
+            else p = db.collection('pages').where('slug','==',slug).get().then(q=>{
+                if (!q.empty) throw new Error('Slug already exists. Choose a different slug.');
+                return db.collection('pages').add(data);
+            });
+            Promise.resolve(p).then(()=>{
+                addPageForm.reset();
+                pageEditor.innerHTML='';
+                editingPageIdInput.value='';
+                submitPageButton.textContent='Save Page';
+                loadPages();
+                alert('Page saved. View at page.html?slug=' + encodeURIComponent(slug));
+            }).catch(err=>{
+                console.error('Error saving page:', err);
+                alert('Error saving page: ' + (err.message || err));
+            });
+        }
+
+        function loadPages() {
+            existingPagesList.innerHTML = '<p>Loading pages...</p>';
+            db.collection('pages').orderBy('updatedAt','desc').get().then(qs=>{
+                existingPagesList.innerHTML='';
+                if (qs.empty) { existingPagesList.innerHTML = '<p>No pages yet. Create one above.</p>'; return; }
+                qs.forEach(doc=>{
+                    const p = doc.data();
+                    const div = document.createElement('div');
+                    div.className='news-item';
+                    const safeTitle = (p.title||'').replace(/</g,'&lt;');
+                    const viewUrl = 'page.html?slug=' + encodeURIComponent(p.slug);
+                    div.innerHTML = `
+                        <div class="news-item-content">
+                            <p><strong>${safeTitle}</strong> — <code>${p.slug}</code><br>
+                            <a href="${viewUrl}" target="_blank" rel="noopener">Preview</a></p>
+                        </div>
+                        <div class="news-item-actions">
+                            <button class="btn" onclick="populatePageFormForEdit('${doc.id}')">Edit</button>
+                            <button class="btn" onclick="deletePage('${doc.id}')" style="background-color:#cc0000;">Delete</button>
+                        </div>`;
+                    existingPagesList.appendChild(div);
+                });
+            }).catch(err=>{
+                console.error('Error loading pages:', err);
+                existingPagesList.innerHTML = '<p style="color:red;">Error loading pages.</p>';
+            });
+        }
+
+        function populatePageFormForEdit(id) {
+            db.collection('pages').doc(id).get().then(doc=>{
+                if (!doc.exists) return alert('Page not found');
+                const p = doc.data();
+                pageSlugInput.value = p.slug;
+                pageTitleInput.value = p.title;
+                pageEditor.innerHTML = p.contentHtml || '';
+                editingPageIdInput.value = doc.id;
+                submitPageButton.textContent = 'Update Page';
+                addPageForm.scrollIntoView({behavior:'smooth', block:'start'});
+            }).catch(err=>alert('Error fetching page: ' + (err.message||err)));
+        }
+
+        function deletePage(id) {
+            if (!confirm('Delete this page?')) return;
+            db.collection('pages').doc(id).delete().then(loadPages).catch(err=>alert('Error deleting page: ' + (err.message||err)));
         }
 
         // --- Feature Box Management Functions ---
