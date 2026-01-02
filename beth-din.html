@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" >
+<style>
+table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 2px;
+    border-color: white;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    background-color: #ffffff;
+}
+li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+    font-family: verdana;
+    text-align: left;
+}
+li a:hover {
+    background-color: #555;
+    color: white;
+}
+body { font-family: verdana; margin:0; padding:0; }
+
+/* Beth Din Specific Styles */
+.btn { padding: 8px 12px; background-color: #003366; color: white; border: none; cursor: pointer; font-family: verdana; font-size: small; margin-right: 5px; }
+.btn:hover { background-color: #005599; }
+.docket-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; background-color: #fcfcfc; border-radius: 4px; }
+.docket-item h3 { margin-top: 0; cursor: pointer; color: #003366; }
+.docket-item h3:hover { text-decoration: underline; }
+.search-box { padding: 8px; width: 100%; max-width: 400px; font-size: 16px; margin-bottom: 20px; border: 1px solid #ccc; }
+#editor-toolbar { background: #eee; padding: 5px; border: 1px solid #ccc; border-bottom: none; }
+#docket-editor { min-height: 300px; border: 1px solid #ccc; padding: 10px; background: white; overflow-y: auto; }
+
+/* Print Styles */
+@media print {
+    body { background-color: white; }
+    .no-print { display: none !important; }
+    body * { visibility: hidden; }
+    #view-section, #view-section * { visibility: visible; }
+    #view-section { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; }
+}
+</style>
+<title>Beth Din Dockets</title>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body bgcolor="white">
+<table width="100%" cellpadding="4" border="0" class="no-print">
+<tr>
+    <td valign="top" width="75%">
+        <div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River</div>
+    </td>
+    <td valign="right" width="25%">
+        <img style="max-width: 100%; height: auto;" src="Rabbinical Council (1) (1).png" alt="Rabbinical Council Logo">
+    </td>
+</tr>
+<tr>
+    <td align="center" colspan="2">
+        <div style="font-family: verdana; font-size:20px; font-weight:bold;">Serving the community</div>
+    </td>
+</tr>
+<tr>
+    <td colspan="2">
+        <hr size="5" style="color: #0000FF">
+    </td>
+</tr>
+</table>
+
+<table width="100%">
+<tr>
+    <td width="10%" align="center" valign="top" class="no-print">
+        <ul id="sidebar-links">
+            <!-- Links loaded via JS -->
+        </ul>
+    </td>
+    <td colspan="2" valign="top">
+        <div style="font-family: verdana; font-size: 16px; padding: 0 20px;">
+            <h1 class="no-print">Beth Din Dockets</h1>
+
+            <!-- Search & List Section -->
+            <div id="list-section">
+                <input type="text" id="search-input" class="search-box no-print" placeholder="Search dockets by title or content (Required)..." onkeyup="filterDockets()">
+                
+                <div id="dockets-container">
+                    <p>Please enter a search term to view dockets.</p>
+                </div>
+            </div>
+
+            <!-- Single View Section -->
+            <div id="view-section" style="display: none;">
+                <div class="no-print" style="margin-bottom: 20px;">
+                    <button onclick="showList()" class="btn">&laquo; Back to List</button>
+                    <button onclick="window.print()" class="btn">Print Docket</button>
+                </div>
+                <div style="border: 1px solid #000; padding: 40px; min-height: 600px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <img src="Rabbinical Council (1) (1).png" alt="Logo" style="max-width: 150px;">
+                        <h2>Rabbinical Council of The Charles River</h2>
+                        <h3>Beth Din Docket</h3>
+                        <table width="100%" style="margin-top: 20px; border: 1px solid #ccc; border-collapse: collapse; font-family: verdana; font-size: small; text-align: left;">
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 8px;"><strong>Docket Number:</strong> <span id="view-docket-number"></span></td>
+                                <td style="border: 1px solid #ccc; padding: 8px;"><strong>Filing Date:</strong> <span id="view-filing-date"></span></td>
+                                <td style="border: 1px solid #ccc; padding: 8px;"><strong>Location:</strong> <span id="view-filing-location"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <hr>
+                    <h1 id="view-docket-title" style="text-align: center; text-decoration: underline;"></h1>
+                    <div id="view-docket-content" style="font-family: 'Times New Roman', Times, serif; font-size: 18px; line-height: 1.6; margin-top: 30px;"></div>
+                    <div style="margin-top: 50px; font-size: small; color: #666; text-align: center;">
+                        <p>Generated on <span id="view-docket-date"></span></p>
+                        <p>Official Record of the RCCR Beth Din</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </td>
+</tr>
+<tr>
+    <td colspan="3" class="no-print">
+        <hr size="2" style="color: #0000FF; margin-top: 30px;">
+        <font size="-2" face="verdana">Copyright, RCCR , <script>document.write(new Date().getFullYear())</script></font>
+        <br><br><a href="beth-din-manage.html" style="color: #ccc; text-decoration: none; font-size: 10px;">Staff Login</a>
+    </td>
+</tr>
+</table>
+
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+        authDomain: "rccr-main.firebaseapp.com",
+        projectId: "rccr-main",
+        storageBucket: "rccr-main.firebasestorage.app",
+        messagingSenderId: "221328154434",
+        appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+        measurementId: "G-97BBMTGDR0"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // State
+    let allDockets = [];
+
+    // Elements
+    const listSection = document.getElementById('list-section');
+    const viewSection = document.getElementById('view-section');
+    const docketsContainer = document.getElementById('dockets-container');
+    const searchInput = document.getElementById('search-input');
+    
+    // Navigation
+    function showList() {
+        viewSection.style.display = 'none';
+        listSection.style.display = 'block';
+    }
+
+    function loadDockets() {
+        // We load data but don't display it until search
+        db.collection('dockets').orderBy('timestamp', 'desc').get().then(qs => {
+            allDockets = [];
+            qs.forEach(doc => {
+                allDockets.push({ id: doc.id, ...doc.data() });
+            });
+            // renderDockets(allDockets); // Don't render initially
+        }).catch(err => {
+            console.error(err);
+            docketsContainer.innerHTML = '<p>Error loading dockets.</p>';
+        });
+    }
+
+    function renderDockets(dockets) {
+        if (dockets.length === 0) {
+            docketsContainer.innerHTML = '<p>No dockets found.</p>';
+            return;
+        }
+        docketsContainer.innerHTML = '';
+        dockets.forEach(d => {
+            const div = document.createElement('div');
+            div.className = 'docket-item';
+            const dateStr = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+            div.innerHTML = `
+                <h3 onclick="viewDocket('${d.id}')">${d.title.replace(/</g, '&lt;')}</h3>
+                <div style="font-size: small; color: #666;">Date: ${dateStr} | Author: ${d.author || 'Unknown'}</div>
+                <div style="margin-top: 10px; color: #333;">${stripHtml(d.content).substring(0, 200)}...</div>
+                <button onclick="viewDocket('${d.id}')" class="btn" style="margin-top:10px; font-size: 12px;">View Full Docket</button>
+            `;
+            docketsContainer.appendChild(div);
+        });
+    }
+
+    function stripHtml(html) {
+        let tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
+
+    function viewDocket(id) {
+        const docket = allDockets.find(d => d.id === id);
+        if (!docket) return;
+
+        document.getElementById('view-docket-title').textContent = docket.title;
+        document.getElementById('view-docket-number').textContent = docket.docketNumber || 'N/A';
+        document.getElementById('view-filing-date').textContent = docket.filingDate || 'N/A';
+        document.getElementById('view-filing-location').textContent = docket.filingLocation || 'N/A';
+        document.getElementById('view-docket-content').innerHTML = docket.content;
+        document.getElementById('view-docket-date').textContent = docket.timestamp ? new Date(docket.timestamp.seconds * 1000).toLocaleString() : '';
+        
+        listSection.style.display = 'none';
+        viewSection.style.display = 'block';
+    }
+
+    function filterDockets() {
+        const term = searchInput.value.toLowerCase();
+        
+        if (!term) {
+            docketsContainer.innerHTML = '<p>Please enter a search term to view dockets.</p>';
+            return;
+        }
+
+        const filtered = allDockets.filter(d => {
+            return (d.title && d.title.toLowerCase().includes(term)) || 
+                   (d.content && stripHtml(d.content).toLowerCase().includes(term));
+        });
+        renderDockets(filtered);
+    }
+
+    // Sidebar
+    function renderSidebarLinks() {
+        const ul = document.getElementById('sidebar-links');
+        if (!ul) return;
+        ul.innerHTML = '<li><a href="index.html">Home</a></li>'; 
+        db.collection('sidebarLinks').orderBy('order').get().then(qs => {
+            if (qs.empty) return;
+            qs.forEach(doc => {
+                const l = doc.data();
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = l.text;
+                a.href = l.url;
+                if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        }).catch(err => console.error('Error loading links:', err));
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        renderSidebarLinks();
+        loadDockets();
+    });
+</script>
+</body>
+</html>
