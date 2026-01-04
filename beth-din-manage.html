@@ -84,6 +84,38 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
                 </div>
             </div>
 
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <label style="font-size: small; font-weight: bold; display: block; margin-bottom: 3px;">Visibility:</label>
+                    <select id="docket-visibility" style="width: 100%; padding: 8px; border: 1px solid #ccc;" onchange="togglePinInput()">
+                        <option value="public">Public</option>
+                        <option value="pin">PIN Protected</option>
+                        <option value="hidden">Hidden</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <div id="pin-wrapper" style="visibility: hidden;">
+                        <label style="font-size: small; font-weight: bold; display: block; margin-bottom: 3px;">Access PIN (4-8 digits):</label>
+                        <input type="text" id="docket-pin" placeholder="Required for PIN Protected" maxlength="8" style="width: 100%; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div style="flex: 1;"></div>
+            </div>
+
+            <div style="margin-bottom: 10px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">
+                <label style="font-size: small; font-weight: bold; margin-right: 10px;">Use Template:</label>
+                <select id="template-select" onchange="applyTemplate()" style="padding: 5px; width: 200px;">
+                    <option value="">-- Select Template --</option>
+                    <optgroup label="Premade" id="premade-templates-group">
+                        <!-- JS populated -->
+                    </optgroup>
+                    <optgroup label="My Templates" id="custom-templates-group">
+                        <!-- JS populated -->
+                    </optgroup>
+                </select>
+                <button onclick="deleteSelectedTemplate()" id="btn-delete-template" class="btn btn-danger" style="display:none; padding: 4px 8px; font-size: 10px; margin-left: 10px;">Delete Template</button>
+            </div>
+
             <div id="editor-toolbar">
                 <button type="button" onclick="document.execCommand('bold',false,null)"><b>B</b></button>
                 <button type="button" onclick="document.execCommand('italic',false,null)"><i>I</i></button>
@@ -95,6 +127,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
             
             <div style="margin-top: 15px;">
                 <button onclick="saveDocket()" class="btn btn-success">Save Docket</button>
+                <button onclick="saveAsTemplate()" class="btn" style="background-color: #666;">Save as Template</button>
                 <button onclick="cancelEdit()" class="btn">Cancel</button>
             </div>
         </div>
@@ -122,6 +155,18 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
 
     let currentUser = null;
     let allDockets = [];
+    let customTemplates = [];
+
+    const premadeTemplates = {
+        "premade_summons": {
+            name: "Summons",
+            content: "<h3>Summons to Beth Din</h3><p><strong>To:</strong> [Party Name]</p><p>You are hereby summoned to appear before the Rabbinical Council of the Charles River Beth Din regarding the matter of: <strong>[Case Subject]</strong>.</p><p><strong>Date:</strong> [Date]<br><strong>Time:</strong> [Time]<br><strong>Location:</strong> [Location]</p><p>Please contact the Beth Din to confirm your attendance.</p>"
+        },
+        "premade_psak": {
+            name: "Psak Din (Judgment)",
+            content: "<h3>Psak Din</h3><p><strong>Case Reference:</strong> [Case Number]</p><p>The undersigned Dayanim, having heard the claims and evidence presented by both parties, hereby issue the following ruling:</p><ol><li>[Ruling Point 1]</li><li>[Ruling Point 2]</li></ol><p><strong>So Ordered.</strong></p><p>Signed:<br>____________________<br>____________________<br>____________________</p>"
+        }
+    };
 
     // Auth Logic
     auth.onAuthStateChanged(user => {
@@ -132,6 +177,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
             document.getElementById('management-content').style.display = 'block';
             document.getElementById('user-display').textContent = user.email;
             loadDockets();
+            loadTemplates();
         } else {
             document.getElementById('login-form').style.display = 'block';
             document.getElementById('logged-in-menu').style.display = 'none';
@@ -160,6 +206,18 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
                 allDockets.push({ id: doc.id, ...doc.data() });
             });
             renderAdminList();
+        });
+    }
+
+    function loadTemplates() {
+        db.collection('docketTemplates').orderBy('name').get().then(qs => {
+            customTemplates = [];
+            qs.forEach(doc => {
+                customTemplates.push({ id: doc.id, ...doc.data() });
+            });
+            renderTemplateOptions();
+        }).catch(err => {
+            console.error("Error loading templates:", err);
         });
     }
 
@@ -205,7 +263,12 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
         document.getElementById('docket-number').value = 'Will be generated on save';
         document.getElementById('filing-date').value = new Date().toISOString().split('T')[0];
         document.getElementById('filing-location').value = '';
+        document.getElementById('docket-visibility').value = 'public';
+        document.getElementById('docket-pin').value = '';
+        togglePinInput();
         document.getElementById('docket-editor').innerHTML = '';
+        document.getElementById('template-select').value = '';
+        document.getElementById('btn-delete-template').style.display = 'none';
     }
 
     function editDocket(id) {
@@ -220,7 +283,12 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
         document.getElementById('docket-number').value = docket.docketNumber || 'N/A';
         document.getElementById('filing-date').value = docket.filingDate || '';
         document.getElementById('filing-location').value = docket.filingLocation || '';
+        document.getElementById('docket-visibility').value = docket.visibility || 'public';
+        document.getElementById('docket-pin').value = docket.pin || '';
+        togglePinInput();
         document.getElementById('docket-editor').innerHTML = docket.content;
+        document.getElementById('template-select').value = '';
+        document.getElementById('btn-delete-template').style.display = 'none';
     }
 
     function cancelEdit() {
@@ -235,6 +303,14 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
         let docketNumber = document.getElementById('docket-number').value;
         const filingDate = document.getElementById('filing-date').value;
         const filingLocation = document.getElementById('filing-location').value;
+        const visibility = document.getElementById('docket-visibility').value;
+        const pin = document.getElementById('docket-pin').value.trim();
+
+        if (visibility === 'pin') {
+            if (!/^\d{4,8}$/.test(pin)) {
+                return alert('For PIN Protected dockets, please enter a 4-8 digit PIN.');
+            }
+        }
 
         if (!title) return alert('Title is required');
 
@@ -248,6 +324,8 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
             filingDate: filingDate,
             filingLocation: filingLocation,
             content: content,
+            visibility: visibility,
+            pin: (visibility === 'pin') ? pin : null,
             searchable: (title + " " + content).toLowerCase(),
             author: currentUser.email,
             timestamp: firebase.firestore.FieldValue.serverTimestamp() // Update timestamp on edit? Or keep original? Usually update.
@@ -283,6 +361,98 @@ input[type="text"], input[type="email"], input[type="password"], input[type="dat
         let tmp = document.createElement("DIV");
         tmp.innerHTML = html;
         return tmp.textContent || tmp.innerText || "";
+    }
+
+    function togglePinInput() {
+        const vis = document.getElementById('docket-visibility').value;
+        const wrapper = document.getElementById('pin-wrapper');
+        wrapper.style.visibility = (vis === 'pin') ? 'visible' : 'hidden';
+    }
+
+    // Template Logic
+    function renderTemplateOptions() {
+        const premadeGroup = document.getElementById('premade-templates-group');
+        const customGroup = document.getElementById('custom-templates-group');
+        
+        premadeGroup.innerHTML = '';
+        customGroup.innerHTML = '';
+
+        for (const [key, val] of Object.entries(premadeTemplates)) {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = val.name;
+            premadeGroup.appendChild(opt);
+        }
+
+        customTemplates.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.name;
+            customGroup.appendChild(opt);
+        });
+    }
+
+    function applyTemplate() {
+        const select = document.getElementById('template-select');
+        const val = select.value;
+        const btnDelete = document.getElementById('btn-delete-template');
+        
+        if (!val) {
+            btnDelete.style.display = 'none';
+            return;
+        }
+
+        // Check if custom template to show delete button
+        const isCustom = customTemplates.find(t => t.id === val);
+        btnDelete.style.display = isCustom ? 'inline-block' : 'none';
+
+        if (document.getElementById('docket-editor').innerHTML.trim().length > 10) {
+            if (!confirm("This will overwrite the current content. Continue?")) {
+                select.value = "";
+                return;
+            }
+        }
+
+        let content = "";
+        if (premadeTemplates[val]) {
+            content = premadeTemplates[val].content;
+        } else if (isCustom) {
+            content = isCustom.content;
+        }
+
+        document.getElementById('docket-editor').innerHTML = content;
+    }
+
+    function saveAsTemplate() {
+        const content = document.getElementById('docket-editor').innerHTML;
+        if (!content) return alert("Editor is empty.");
+        
+        const name = prompt("Enter a name for this template:");
+        if (!name) return;
+
+        db.collection('docketTemplates').add({
+            name: name,
+            content: content,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            alert("Template saved!");
+            loadTemplates();
+        }).catch(err => alert("Error saving template: " + err.message));
+    }
+
+    function deleteSelectedTemplate() {
+        const select = document.getElementById('template-select');
+        const id = select.value;
+        if (!id) return;
+        
+        if (!confirm("Delete this template?")) return;
+
+        db.collection('docketTemplates').doc(id).delete().then(() => {
+            alert("Template deleted.");
+            select.value = "";
+            loadTemplates();
+            document.getElementById('btn-delete-template').style.display = 'none';
+        }).catch(err => alert("Error deleting: " + err.message));
     }
 </script>
 </body>

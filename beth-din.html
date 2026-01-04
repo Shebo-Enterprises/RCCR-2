@@ -88,7 +88,7 @@ body { font-family: verdana; margin:0; padding:0; }
 
             <!-- Search & List Section -->
             <div id="list-section">
-                <input type="text" id="search-input" class="search-box no-print" placeholder="Search dockets by title or content (Required)..." onkeyup="filterDockets()">
+                <input type="text" id="search-input" class="search-box no-print" placeholder="Search by ID, date, title, or excerpt..." onkeyup="filterDockets()">
                 
                 <div id="dockets-container">
                     <p>Please enter a search term to view dockets.</p>
@@ -100,6 +100,7 @@ body { font-family: verdana; margin:0; padding:0; }
                 <div class="no-print" style="margin-bottom: 20px;">
                     <button onclick="showList()" class="btn">&laquo; Back to List</button>
                     <button onclick="window.print()" class="btn">Print Docket</button>
+                    <button onclick="copyPermalink()" class="btn">Copy Permalink</button>
                 </div>
                 <div style="border: 1px solid #000; padding: 40px; min-height: 600px;">
                     <div style="text-align: center; margin-bottom: 30px;">
@@ -136,6 +137,19 @@ body { font-family: verdana; margin:0; padding:0; }
 </tr>
 </table>
 
+<!-- PIN Modal -->
+<div id="pin-modal" class="no-print" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:8px; width:300px; text-align:center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3 style="margin-top:0;">Restricted Access</h3>
+        <p>Please enter the PIN to view this docket.</p>
+        <input type="password" id="pin-input" style="padding:8px; width:80%; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;" placeholder="PIN Code" onkeydown="if(event.key==='Enter') submitPin()">
+        <div>
+            <button onclick="submitPin()" class="btn">Submit</button>
+            <button onclick="closePinModal()" class="btn" style="background-color:#666;">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // Firebase Config
     const firebaseConfig = {
@@ -155,6 +169,8 @@ body { font-family: verdana; margin:0; padding:0; }
 
     // State
     let allDockets = [];
+    let currentDocketId = null;
+    let pendingDocketId = null;
 
     // Elements
     const listSection = document.getElementById('list-section');
@@ -173,9 +189,16 @@ body { font-family: verdana; margin:0; padding:0; }
         db.collection('dockets').orderBy('timestamp', 'desc').get().then(qs => {
             allDockets = [];
             qs.forEach(doc => {
-                allDockets.push({ id: doc.id, ...doc.data() });
+                const data = doc.data();
+                if (data.visibility === 'hidden') return;
+                allDockets.push({ id: doc.id, ...data });
             });
             // renderDockets(allDockets); // Don't render initially
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const docketId = urlParams.get('id');
+            if (docketId) viewDocket(docketId);
+
         }).catch(err => {
             console.error(err);
             docketsContainer.innerHTML = '<p>Error loading dockets.</p>';
@@ -192,10 +215,14 @@ body { font-family: verdana; margin:0; padding:0; }
             const div = document.createElement('div');
             div.className = 'docket-item';
             const dateStr = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+            let snippet = stripHtml(d.content).substring(0, 200) + '...';
+            if (d.visibility === 'pin') {
+                snippet = '<em>(This docket is PIN protected)</em>';
+            }
             div.innerHTML = `
                 <h3 onclick="viewDocket('${d.id}')">${d.title.replace(/</g, '&lt;')}</h3>
-                <div style="font-size: small; color: #666;">Date: ${dateStr} | Author: ${d.author || 'Unknown'}</div>
-                <div style="margin-top: 10px; color: #333;">${stripHtml(d.content).substring(0, 200)}...</div>
+                <div style="font-size: small; color: #666;">Date: ${dateStr}</div>
+                <div style="margin-top: 10px; color: #333;">${snippet}</div>
                 <button onclick="viewDocket('${d.id}')" class="btn" style="margin-top:10px; font-size: 12px;">View Full Docket</button>
             `;
             docketsContainer.appendChild(div);
@@ -212,6 +239,34 @@ body { font-family: verdana; margin:0; padding:0; }
         const docket = allDockets.find(d => d.id === id);
         if (!docket) return;
 
+        if (docket.visibility === 'pin') {
+            pendingDocketId = id;
+            document.getElementById('pin-modal').style.display = 'flex';
+            document.getElementById('pin-input').focus();
+            return;
+        }
+        renderDocketView(docket);
+    }
+
+    function closePinModal() {
+        document.getElementById('pin-modal').style.display = 'none';
+        document.getElementById('pin-input').value = '';
+        pendingDocketId = null;
+    }
+
+    function submitPin() {
+        const pin = document.getElementById('pin-input').value;
+        const docket = allDockets.find(d => d.id === pendingDocketId);
+        if (docket && docket.pin === pin) {
+            closePinModal();
+            renderDocketView(docket);
+        } else {
+            alert("Incorrect PIN.");
+        }
+    }
+
+    function renderDocketView(docket) {
+        currentDocketId = docket.id;
         document.getElementById('view-docket-title').textContent = docket.title;
         document.getElementById('view-docket-number').textContent = docket.docketNumber || 'N/A';
         document.getElementById('view-filing-date').textContent = docket.filingDate || 'N/A';
@@ -223,17 +278,31 @@ body { font-family: verdana; margin:0; padding:0; }
         viewSection.style.display = 'block';
     }
 
+    function copyPermalink() {
+        if (!currentDocketId) return;
+        const url = window.location.origin + window.location.pathname + '?id=' + currentDocketId;
+        navigator.clipboard.writeText(url).then(() => alert('Permalink copied to clipboard!'));
+    }
+
     function filterDockets() {
         const term = searchInput.value.toLowerCase();
         
-        if (!term) {
-            docketsContainer.innerHTML = '<p>Please enter a search term to view dockets.</p>';
+        if (!term || term.length < 3) {
+            docketsContainer.innerHTML = '<p>Please enter a search term (at least 2 characters) to view dockets.</p>';
             return;
         }
 
         const filtered = allDockets.filter(d => {
-            return (d.title && d.title.toLowerCase().includes(term)) || 
-                   (d.content && stripHtml(d.content).toLowerCase().includes(term));
+            let excerpt = '';
+            if (d.visibility !== 'pin' && d.content) {
+                excerpt = stripHtml(d.content).trim().split(/\s+/).slice(0, 10).join(' ').toLowerCase();
+            }
+            const title = d.title ? d.title.toLowerCase() : '';
+            const docketNum = d.docketNumber ? String(d.docketNumber).toLowerCase() : '';
+            const fDate = d.filingDate ? String(d.filingDate).toLowerCase() : '';
+
+            return title.includes(term) || excerpt.includes(term) || 
+                   docketNum.includes(term) || fDate.includes(term);
         });
         renderDockets(filtered);
     }
