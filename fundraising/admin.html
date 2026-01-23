@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CharlesCharity Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="logo"><i class="fas fa-hand-holding-heart"></i> CharlesCharity Dashboard</div>
+            <div class="nav-links">
+                <span id="user-email-display" style="margin-right: 15px; font-size: 0.9rem;"></span>
+                <button id="btn-logout" class="btn-login hidden">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AUTH VIEW -->
+    <div id="auth-view" class="container">
+        <div class="auth-container">
+            <h2 style="margin-bottom: 20px;">Welcome Back</h2>
+            <form id="login-form">
+                <input type="email" id="auth-email" placeholder="Email Address" required>
+                <input type="password" id="auth-password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" style="width: 100%;">Sign In / Sign Up</button>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #666;">(If account doesn't exist, one will be created)</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="dashboard-layout hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a class="active" onclick="switchTab('campaigns')"><i class="fas fa-bullhorn"></i> Campaigns</a></li>
+                <li><a onclick="switchTab('wallet')"><i class="fas fa-wallet"></i> Wallet & Payouts</a></li>
+                <li><a onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-content">
+            
+            <!-- Campaigns Tab -->
+            <div id="tab-campaigns">
+                <!-- List View -->
+                <div id="campaigns-list-view">
+                    <div class="dash-header">
+                        <h2>Your Campaigns</h2>
+                        <button class="btn-primary" onclick="openModal('campaign-modal')">+ New Campaign</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Raised</h3>
+                            <div class="value" id="total-raised-display">$0.00</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Active Campaigns</h3>
+                            <div class="value" id="active-campaigns-display">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Donors</h3>
+                            <div class="value" id="total-donors-display">0</div>
+                        </div>
+                    </div>
+
+                    <div id="campaigns-list">
+                        <p class="loading-text">Loading campaigns...</p>
+                    </div>
+                </div>
+
+                <!-- Detail View (Hidden by default) -->
+                <div id="campaign-detail-view" class="hidden">
+                    <div class="dash-header">
+                        <button class="btn-outline" onclick="showCampaignsList()">&larr; Back to List</button>
+                        <div style="text-align:right;">
+                            <button class="btn-outline" onclick="shareCurrentCampaign()"><i class="fas fa-share-alt"></i> Share</button>
+                            <a id="view-live-btn" href="#" target="_blank" class="btn-outline" style="text-decoration:none; display:inline-block; padding:8px 15px;"><i class="fas fa-external-link-alt"></i> View Live</a>
+                        </div>
+                    </div>
+                    
+                    <div class="campaign-detail-header" style="margin-bottom: 20px;">
+                        <h1 id="detail-title" style="display:inline-block;">Campaign Title</h1>
+                        <span id="detail-status" class="status-badge status-active">Active</span>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" onclick="switchDetailTab('overview')">Overview</button>
+                        <button class="tab-btn" onclick="switchDetailTab('donations')">Donations</button>
+                        <button class="tab-btn" onclick="switchDetailTab('settings')">Settings</button>
+                    </div>
+
+                    <!-- Overview Tab -->
+                    <div id="detail-content-overview" class="detail-tab-content">
+                        <div class="stats-grid">
+                            <div class="stat-card"><h3>Raised</h3><div class="value" id="detail-raised">$0</div></div>
+                            <div class="stat-card"><h3>Goal</h3><div class="value" id="detail-goal">$0</div></div>
+                            <div class="stat-card"><h3>Donors</h3><div class="value" id="detail-donors">0</div></div>
+                        </div>
+                        <div style="background:white; padding:20px; border-radius:8px; border:1px solid var(--border);">
+                            <h3>Progress</h3>
+                            <div style="background:#eee; height:10px; border-radius:5px; margin:15px 0; overflow:hidden;">
+                                <div id="detail-progress-bar" style="background:var(--primary); height:100%; width:0%;"></div>
+                            </div>
+                            <p id="detail-percent">0% Funded</p>
+                        </div>
+                    </div>
+
+                    <!-- Donations Tab -->
+                    <div id="detail-content-donations" class="detail-tab-content hidden">
+                        <table class="data-table">
+                            <thead><tr><th>Donor</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody id="detail-donations-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Settings Tab (Edit Form) -->
+                    <div id="detail-content-settings" class="detail-tab-content hidden">
+                        <div style="background:white; padding:30px; border-radius:8px; border:1px solid var(--border); max-width:800px;">
+                            <form id="settings-form">
+                                <div class="form-group">
+                                    <label>Campaign Title</label>
+                                    <input type="text" id="set-title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Short Description</label>
+                                    <input type="text" id="set-short-desc">
+                                </div>
+                                <div style="display:flex; gap:20px;">
+                                    <div class="form-group" style="flex:1;">
+                                        <label>Goal Amount ($)</label>
+                                        <input type="number" id="set-goal" required>
+                                    </div>
+                                    <div class="form-group" style="flex:1;">
+                                        <label>Status</label>
+                                        <select id="set-status" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:4px;">
+                                            <option value="active">Active</option>
+                                            <option value="paused">Paused</option>
+                                            <option value="completed">Completed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Image URL</label>
+                                    <input type="url" id="set-image" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Story</label>
+                                    <textarea id="set-story" rows="6" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label style="display:block; margin-bottom:8px;">Accepted Payment Methods</label>
+                                    <div style="display:flex; gap:15px;">
+                                        <label style="font-weight:normal;"><input type="checkbox" id="set-method-card" value="card"> Card</label>
+                                        <label style="font-weight:normal;"><input type="checkbox" id="set-method-cash" value="cash"> Cash</label>
+                                        <label style="font-weight:normal;"><input type="checkbox" id="set-method-custom" value="custom"> Custom</label>
+                                        <input type="text" id="set-custom-label" placeholder="e.g. Venmo / Zelle" style="padding:5px; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-primary">Save Changes</button>
+                                <hr style="margin:30px 0;">
+                                <h3 style="color:var(--danger);">Danger Zone</h3>
+                                <p style="margin-bottom:10px; font-size:0.9rem;">Deleting a campaign cannot be undone.</p>
+                                <button type="button" class="btn-danger" onclick="deleteCurrentCampaign()">Delete Campaign</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Tab -->
+            <div id="tab-wallet" class="hidden">
+                <div class="dash-header">
+                    <h2>Wallet & Settings</h2>
+                </div>
+                
+                <div class="wallet-grid">
+                    <!-- Left Col: Profile & Billing -->
+                    <div>
+                        <div class="stat-card" style="margin-bottom: 20px;">
+                            <h3>Public Profile</h3>
+                            <form id="profile-form">
+                                <div class="form-group">
+                                    <label>Display Name</label>
+                                    <input type="text" id="user-display-name" placeholder="Organization or Name">
+                                </div>
+                                <button type="submit" class="btn-primary">Save Profile</button>
+                            </form>
+                        </div>
+
+                        <div class="stat-card">
+                            <h3>Billing Information</h3>
+                            <form id="billing-form">
+                                <div class="form-group">
+                                    <label>Legal Name</label>
+                                    <input type="text" id="billing-name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <input type="text" id="billing-address">
+                                </div>
+                                <button type="submit" class="btn-primary">Update Billing</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right Col: Payment Methods -->
+                    <div>
+                        <div class="stat-card">
+                            <h3>Payment Methods</h3>
+                            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">Connect a payout method to receive funds.</p>
+                            
+                            <div id="payment-methods-list" style="margin-bottom: 15px;">
+                                <!-- JS will populate -->
+                                <p style="color:#999; font-style:italic;">No payment methods added.</p>
+                            </div>
+
+                            <button class="btn-outline" onclick="openModal('payment-modal')" style="width:100%;">+ Add Payment Method</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="tab-settings" class="hidden">
+                <div class="dash-header">
+                    <h2>Account Settings</h2>
+                </div>
+                <div class="stat-card">
+                    <p>Manage your profile and notification preferences here.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- CREATE/EDIT CAMPAIGN MODAL -->
+    <div id="campaign-modal" class="modal">
+        <div class="modal-content" style="width: 600px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2 id="modal-title">Create Campaign</h2>
+                <button onclick="closeModal('campaign-modal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            
+            <form id="campaign-form">
+                <div class="form-group">
+                    <label>Campaign Title</label>
+                    <input type="text" id="c-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Short Description (Snippet)</label>
+                    <input type="text" id="c-short-desc" placeholder="One sentence summary..." required>
+                </div>
+                <div style="display:flex; gap:15px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Goal Amount ($)</label>
+                        <input type="number" id="c-goal" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Organizer Name</label>
+                        <input type="text" id="c-organizer" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="url" id="c-image" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label style="display:block; margin-bottom:8px;">Accepted Payment Methods</label>
+                    <div style="display:flex; gap:15px;">
+                        <label style="font-weight:normal;"><input type="checkbox" id="c-method-card" value="card" checked> Card</label>
+                        <label style="font-weight:normal;"><input type="checkbox" id="c-method-cash" value="cash"> Cash</label>
+                        <label style="font-weight:normal;"><input type="checkbox" id="c-method-custom" value="custom"> Custom</label>
+                        <input type="text" id="c-custom-label" placeholder="e.g. Venmo / Zelle" style="padding:5px; border:1px solid var(--border); border-radius:4px; font-size:0.9rem;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Story</label>
+                    <textarea id="c-story" rows="6" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Save Campaign</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAYMENT METHOD MODAL -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h2>Add Payment Method</h2>
+                <button onclick="closeModal('payment-modal')" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <form id="payment-method-form">
+                <div class="form-group">
+                    <label>Bank Name</label>
+                    <input type="text" id="pm-bank" placeholder="e.g. Chase" required>
+                </div>
+                <div class="form-group">
+                    <label>Account Number (Last 4)</label>
+                    <input type="text" id="pm-account" placeholder="1234" maxlength="4" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;">Add Account</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EMBED MODAL -->
+    <div id="embed-modal" class="modal">
+        <div class="modal-content">
+            <h3>Share Campaign</h3>
+            <p>Public Link:</p>
+            <input type="text" id="share-link" readonly style="width:100%; padding:10px; margin-bottom:15px; background:#f4f4f4; border:1px solid #ddd;">
+            
+            <p>Embed Code:</p>
+            <textarea id="embed-code" readonly rows="3" style="width:100%; padding:10px; background:#f4f4f4; border:1px solid #ddd;"></textarea>
+            
+            <div style="text-align:right; margin-top:15px;">
+                <button class="btn-outline" onclick="closeModal('embed-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+    <script>
+        // Simple Tab Switcher
+        window.switchTab = (tabName) => {
+            document.querySelectorAll('.dashboard-content > div').forEach(d => d.classList.add('hidden'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            event.target.closest('a').classList.add('active');
+        };
+
+        window.switchDetailTab = (tabName) => {
+            document.querySelectorAll('.detail-tab-content').forEach(d => d.classList.add('hidden'));
+            document.getElementById('detail-content-' + tabName).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    </script>
+</body>
+</html>
