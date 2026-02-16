@@ -75,23 +75,6 @@
             gap: 4rem;
         }
 
-        /* Inquiry Form Transitions */
-        .step { display: none; }
-        .step.active { display: block; animation: fadeIn 0.5s ease; }
-
-        input, select, textarea {
-            background: transparent;
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
-            width: 100%;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-
         .form-section-label {
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.5rem;
@@ -99,18 +82,36 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 0.5rem;
         }
+
+        .btn-gold {
+            background-color: #000;
+            color: #fff;
+            padding: 1.25rem 2.5rem;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 10px;
+            transition: all 0.5s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-gold:hover {
+            background-color: transparent;
+            color: #000;
+            border-color: #000;
+        }
     </style>
 </head>
 <body>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 px-8 py-6 flex justify-between items-center bg-[#faf9f6]/80 backdrop-blur-md">
+    <nav class="fixed w-full z-50 px-8 py-6 flex justify-between items-center bg-[#faf9f6]/80 backdrop-blur-md border-b border-black/5">
         <div class="brand-font text-3xl tracking-widest font-semibold">GOLUS</div>
         <div class="hidden md:flex space-x-12 uppercase text-[10px] tracking-[0.2em] font-light">
             <a href="#home" class="nav-link relative">Home</a>
             <a href="#menu" class="nav-link relative">The Menu</a>
             <a href="#pricing" class="nav-link relative">Pricing</a>
-            <a href="#contact" class="nav-link relative">Inquire</a>
+            <a href="#inquiry" class="nav-link relative">Inquiry</a>
         </div>
         <button class="md:hidden">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -251,100 +252,40 @@
                 </div>
 
                 <div class="text-center mt-10">
-                    <a href="#contact" class="inline-block border border-black px-12 py-4 uppercase text-[10px] tracking-widest hover:bg-black hover:text-white transition-all">Submit Portfolio</a>
+                    <a href="#inquiry" class="inline-block border border-black px-12 py-4 uppercase text-[10px] tracking-widest hover:bg-black hover:text-white transition-all">Request Eligibility Portfolio</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Multi-Step Inquiry Form -->
-    <section id="contact" class="py-32 px-8">
+    <!-- Inquiry Download Section -->
+    <section id="inquiry" class="py-32 px-8 bg-white">
         <div class="max-w-3xl mx-auto">
             <div class="text-center mb-16 reveal">
                 <h2 class="text-4xl mb-4">Inquiry Process</h2>
                 <p class="text-gray-400 font-light italic">Comprehensive evaluation for culinary eligibility.</p>
             </div>
 
-            <div class="bg-white p-8 md:p-16 shadow-2xl border border-gray-50 reveal">
-                <form id="inquiry-form" netlify>
-                    <!-- Step 1: Host Basics -->
-                    <div class="step active" id="step-1">
-                        <div class="form-section-label">I. Host Information</div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Full Name</label>
-                                <input type="text" placeholder="Johnathan Sterling" required>
-                            </div>
-                            <div>
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Email Address</label>
-                                <input type="email" placeholder="john@example.com" required>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Primary Phone</label>
-                                <input type="tel" placeholder="+1 (555) 000-0000" required>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Event Date & Venue</label>
-                                <input type="text" placeholder="October 12, 2024 - The Grand Manor" required>
-                            </div>
-                        </div>
-                        <button type="button" onclick="nextStep(2)" class="mt-12 w-full py-4 bg-black text-white uppercase text-[10px] tracking-widest hover:bg-gray-800 transition-all">Next</button>
-                    </div>
+            <div class="bg-[#faf9f6] p-12 md:p-24 shadow-2xl border border-gray-100 text-center reveal">
+                <div class="brand-font text-3xl mb-6">Eligibility & Selection Portfolio</div>
+                <div class="w-16 h-[1px] bg-accent mx-auto mb-8"></div>
+                
+                <p class="text-gray-600 font-light leading-loose mb-12 max-w-lg mx-auto text-sm">
+                    In order to maintain the exclusivity of our aged selections, we do not accept digital submissions. 
+                    Please download our comprehensive portfolio below, which includes the <span class="italic">Full Menu</span>, 
+                    <span class="italic">Financial Disclosure</span>, and <span class="italic">Add-ons</span> forms. 
+                    Completed portfolios must be returned via e-mail to goluscatering@gmail.com.
+                </p>
+                
+                <a href="#" download="goluscaterers1.pdf" class="btn-gold">
+                    Download Portfolio (PDF)
+                </a>
 
-                    <!-- Step 2: Lineage & Progeny -->
-                    <div class="step" id="step-2">
-                        <div class="form-section-label">II. Background & Progeny Auditing</div>
-                        <div class="space-y-8">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <label class="uppercase text-[9px] tracking-widest text-gray-400">Mother's Side History</label>
-                                    <textarea rows="2" placeholder="Heritage and known scandals..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="uppercase text-[9px] tracking-widest text-gray-400">Father's Side History</label>
-                                    <textarea rows="2" placeholder="Lineage and social standing..."></textarea>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Marital Status of All Children</label>
-                                <textarea rows="2" placeholder="Current marital or romantic status of progeny..."></textarea>
-                            </div>
-                            <div>
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Academic Institutions (Children)</label>
-                                <textarea rows="2" placeholder="Schools and private institutions attended..."></textarea>
-                            </div>
-                        </div>
-                        <div class="flex gap-4 mt-12">
-                            <button type="button" onclick="nextStep(1)" class="w-1/3 py-4 border border-gray-200 uppercase text-[10px] tracking-widest">Back</button>
-                            <button type="button" onclick="nextStep(3)" class="w-2/3 py-4 bg-black text-white uppercase text-[10px] tracking-widest hover:bg-gray-800 transition-all">Next</button>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Financial Scrutiny -->
-                    <div class="step" id="step-3">
-                        <div class="form-section-label">III. Financial Disclosure</div>
-                        <div class="space-y-8">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <label class="uppercase text-[9px] tracking-widest text-gray-400">Annual Gross Income</label>
-                                    <input type="text" placeholder="$0.00" required>
-                                </div>
-                                <div>
-                                    <label class="uppercase text-[9px] tracking-widest text-gray-400">Monthly Household Expenses</label>
-                                    <input type="text" placeholder="$0.00" required>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="uppercase text-[9px] tracking-widest text-gray-400">Full Asset & Liability Situation</label>
-                                <textarea rows="4" placeholder="Detail real estate, stock portfolios, and outstanding debt..."></textarea>
-                            </div>
-                        </div>
-                        <div class="flex gap-4 mt-12">
-                            <button type="button" onclick="nextStep(2)" class="w-1/3 py-4 border border-gray-200 uppercase text-[10px] tracking-widest">Back</button>
-                            <button type="submit" class="w-2/3 py-4 bg-accent text-white uppercase text-[10px] tracking-widest hover:opacity-90 transition-all">Submit Inquiry</button>
-                        </div>
-                    </div>
-                </form>
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <p class="text-[9px] uppercase tracking-[0.4em] text-gray-400">
+                        Revision: 11.2026-B | Size: 14.5MB
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -364,23 +305,13 @@
         <div class="brand-font text-4xl mb-8 tracking-[0.3em]">GOLUS</div>
         <div class="flex flex-col space-y-4 mb-12 text-sm font-light tracking-widest text-gray-500 uppercase">
             <p>Aged to Perfection • Prepared with Apathy</p>
-            <p>inquiries@goluscatering.com</p>
+            <p>goluscatering@gmail.com</p>
         </div>
+        <p class="text-[8px] text-gray-300 uppercase tracking-widest">© 2026 Golus Culinary Group. All rights reserved.</p>
     </footer>
 
     <script>
-        function nextStep(step) {
-            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-            document.getElementById('step-' + step).classList.add('active');
-            
-            // Scroll to form top smoothly
-            const contactSection = document.getElementById('contact');
-            window.scrollTo({
-                top: contactSection.offsetTop - 50,
-                behavior: 'smooth'
-            });
-        }
-
+        // Scroll Reveal Animation
         function reveal() {
             var reveals = document.querySelectorAll(".reveal");
             for (var i = 0; i < reveals.length; i++) {
@@ -393,13 +324,17 @@
             }
         }
         window.addEventListener("scroll", reveal);
-        reveal();
+        window.addEventListener("load", reveal); // Run on initial load
 
-        document.getElementById('inquiry-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Your comprehensive profile has been submitted. Our forensic accounting team will contact you once the brisket has dried further.');
+        // Smooth Scroll for Navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
         });
     </script>
 </body>
-
 </html>
