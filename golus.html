@@ -3,43 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Golus Catering | Exquisite Culinary Experiences</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
     <style>
-        /* Hero section styles */
-        .hero {
-            background-image: url('path/to/your/image.jpg'); /* Add your background image path */
-            height: 100vh;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
+        :root {
+            --primary: #1a1a1a;
+            --accent: #d4af37;
+            --bg: #faf9f6;
         }
 
-        /* Gradient overlay styling */
-        .hero::before {
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, .brand-font {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transition: all 1s ease-out;
+            transform: translateY(30px);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .menu-card img {
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: sepia(30%) contrast(1.1) brightness(0.9);
+        }
+
+        .menu-card:hover img {
+            transform: scale(1.08);
+            filter: sepia(0%) contrast(1.2);
+        }
+
+        .nav-link::after {
             content: '';
             position: absolute;
-            top: 0;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5); /* Fallback for older browsers */
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); /* Gradient overlay */
-            z-index: 1;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
         }
 
-        .hero h1 {
-            position: relative;
-            z-index: 2;
-            font-size: 3em;
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 4rem;
+        }
+
+        .form-section-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .btn-gold {
+            background-color: #000;
+            color: #fff;
+            padding: 1.25rem 2.5rem;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 10px;
+            transition: all 0.5s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-gold:hover {
+            background-color: transparent;
+            color: #000;
+            border-color: #000;
         }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <h1>Your Hero Title</h1>
-    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 px-8 py-6 flex justify-between items-center bg-[#faf9f6]/80 backdrop-blur-md border-b border-black/5">
+        <div class="brand-font text-3xl tracking-widest font-semibold">GOLUS</div>
+        <div class="hidden md:flex space-x-12 uppercase text-[10px] tracking-[0.2em] font-light">
+            <a href="#home" class="nav-link relative">Home</a>
+            <a href="#menu" class="nav-link relative">The Menu</a>
+            <a href="#pricing" class="nav-link relative">Pricing</a>
+            <a href="#inquiry" class="nav-link relative">Inquiry</a>
+        </div>
+        <button class="md:hidden">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&q=80&w=2000" 
+                 class="w-full h-full object-cover opacity-20 scale-110 grayscale" alt="Old Kitchen Background">
+        </div>
+        
+        <div class="relative z-10 text-center px-4 fade-in">
+            <span class="uppercase tracking-[0.5em] text-xs mb-4 block text-gray-500">Unconventional Catering</span>
+            <h1 class="text-6xl md:text-8xl font-light mb-6">Golus <span class="italic font-normal">Catering</span></h1>
+            <p class="max-w-xl mx-auto text-gray-600 font-light leading-relaxed mb-10">
+                Honest ingredients with a history. Flavors that have stood the test of time (and refrigeration).
+            </p>
+            <a href="#menu" class="border border-black px-10 py-4 uppercase text-[10px] tracking-widest hover:bg-black hover:text-white transition-colors duration-500">
+                View the Collection
+            </a>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section id="menu" class="py-24 px-8 md:px-24">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20 reveal">
+                <h2 class="text-4xl md:text-5xl mb-4">The Vintage Menu</h2>
+                <div class="w-12 h-[1px] bg-accent mx-auto mb-6"></div>
+                <p class="text-gray-500 font-light italic">Signature dishes curated with patience</p>
+            </div>
+
+            <div class="menu-grid">
+                <!-- Item 1 -->
+                <div class="menu-card reveal">
+                    <div class="overflow-hidden aspect-square mb-6 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale contrast-125" alt="Raw looking Chicken">
+                    </div>
+                    <h3 class="text-2xl mb-2">Unseasoned Bone Chicken</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed">Pure, minimalist poultry served in its most elemental, unadorned, and ghostly state.</p>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="menu-card reveal">
+                    <div class="overflow-hidden aspect-square mb-6 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1593030103066-019301451b51?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover brightness-75 contrast-150" alt="Dry Brisket">
+                    </div>
+                    <h3 class="text-2xl mb-2">Aged Fridge Brisket</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed">Slow-cured in the cold for seven days to achieve a signature parched, hyper-dry, fibrous texture.</p>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="menu-card reveal">
+                    <div class="overflow-hidden aspect-square mb-6 bg-gray-200">
+                        <img src="https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover grayscale" alt="Single Leaf">
+                    </div>
+                    <h3 class="text-2xl mb-2">The 13-Leaf Monochromatic</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed">An avant-garde study in repetition featuring thirteen identical, slightly wilted leaves for a uniform palate experience.</p>
+                </div>
+
+                <!-- Item 4 -->
+                <div class="menu-card reveal">
+                    <div class="overflow-hidden aspect-square mb-6 bg-gray-200">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQlJSq4e7M6nuXFvKSItnSsI7baRTM2l2UUSA&s" class="w-full h-full object-cover saturate-0 brightness-110" alt="Gefilte Fish">
+                    </div>
+                    <h3 class="text-2xl mb-2">Gourmet Gefilte Fish</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed">Grey-scale textures accompanied by authentic mikvah-dipped gefilte belts for a truly deep-rooted tradition.</p>
+                </div>
+
+                <!-- Item 5 -->
+                <div class="menu-card reveal">
+                    <div class="overflow-hidden aspect-square mb-6 bg-gray-200">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuJsng9y-26RaLV4poGRrD5bAczRdmjkBn-g&s" class="w-full h-full object-cover blur-[1px]" alt="Cloudy Soup">
+                    </div>
+                    <h3 class="text-2xl mb-2">Le Pee Chicken Soup</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed">Infused with delicate, unidentifiable artistic specks for a visually striking and cloudy broth presentation.</p>
+                </div>
+
+                <!-- Item 6 -->
+                <div class="menu-card reveal">
+                    <div class="overflow-hidden aspect-square mb-6 bg-gray-200">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiCjaOZCx5y_ZmQOkGTJxlNzAEXyhLANS1RQ&s" class="w-full h-full object-cover sepia brightness-50" alt="Old Pie">
+                    </div>
+                    <h3 class="text-2xl mb-2">Si Booty Petite Apple Pie</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed">A compact, sculptural pastry that has seen better days, designed for a delicate finish.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Area -->
+    <section id="pricing" class="py-32 bg-[#f3f2ef]">
+        <div class="max-w-4xl mx-auto px-8">
+            <div class="text-center mb-16 reveal">
+                <span class="uppercase tracking-[0.3em] text-[10px] text-gray-400">The Requirement</span>
+                <h2 class="text-5xl mt-4">Pricing</h2>
+            </div>
+            
+            <div class="bg-white p-12 md:p-20 shadow-sm reveal">
+                <div class="flex flex-col md:flex-row justify-between items-center border-b border-gray-100 pb-10 mb-10 text-center md:text-left">
+                    <div>
+                        <h3 class="text-3xl mb-2">Main Menu Experience</h3>
+                        <p class="text-gray-400 font-light italic text-sm">A curation of fridge-matured delicacies.</p>
+                    </div>
+                    <div class="mt-6 md:mt-0">
+                        <span class="text-4xl brand-font">$12,000</span>
+                        <span class="text-xs tracking-widest text-gray-400 ml-2">USD BASE</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="space-y-4">
+                        <h4 class="uppercase tracking-widest text-xs font-semibold text-accent">Inclusive Of</h4>
+                        <ul class="text-sm space-y-2 text-gray-600 font-light">
+                            <li>• The Full Vintage Catalog</li>
+                            <li>• 7-Day Fridge Brisket</li>
+                            <li>• Le Pee Soup Specks</li>
+                            <li>• Belts for Gefilte Fish</li>
+                        </ul>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="uppercase tracking-widest text-xs font-semibold text-red-800">Exclusive Of</h4>
+                        <ul class="text-sm space-y-2 text-gray-400 font-light">
+                            <li>• Venue & Service Staff</li>
+                            <li>• Sternos & Heating</li>
+                            <li>• Warmer Boxes</li>
+                            <li>• Utensils & Napkins</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-6 text-center border-l-4 border-accent">
+                    <p class="text-[10px] uppercase tracking-widest text-gray-500 leading-relaxed">
+                        Notice: Fees are calculated based on your net worth. Depending on your financial situation and declared assets, we reserve the right to charge significantly higher rates.
+                    </p>
+                </div>
+
+                <div class="text-center mt-10">
+                    <a href="#inquiry" class="inline-block border border-black px-12 py-4 uppercase text-[10px] tracking-widest hover:bg-black hover:text-white transition-all">Request Eligibility Portfolio</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inquiry Download Section -->
+    <section id="inquiry" class="py-32 px-8 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl mb-4">Inquiry Process</h2>
+                <p class="text-gray-400 font-light italic">Comprehensive evaluation for culinary eligibility.</p>
+            </div>
+
+            <div class="bg-[#faf9f6] p-12 md:p-24 shadow-2xl border border-gray-100 text-center reveal">
+                <div class="brand-font text-3xl mb-6">Eligibility & Selection Portfolio</div>
+                <div class="w-16 h-[1px] bg-accent mx-auto mb-8"></div>
+                
+                <p class="text-gray-600 font-light leading-loose mb-12 max-w-lg mx-auto text-sm">
+                    In order to maintain the exclusivity of our aged selections, we do not accept digital submissions. 
+                    Please download our comprehensive portfolio below, which includes the <span class="italic">Full Menu</span>, 
+                    <span class="italic">Financial Disclosure</span>, and <span class="italic">Add-ons</span> forms. 
+                    Completed portfolios must be returned via e-mail to goluscatering@gmail.com.
+                </p>
+                
+                <a href="goluscaterers1.pdf" download class="btn-gold">
+                    Download Form (PDF)
+                </a>
+
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <p class="text-[9px] uppercase tracking-[0.4em] text-gray-400">
+                        Revision: 11.2026-B | Size: 14.5MB
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy -->
+    <section id="about" class="bg-[#1a1a1a] text-white py-32 px-8">
+        <div class="max-w-4xl mx-auto text-center reveal">
+            <h2 class="text-3xl md:text-5xl font-light mb-8 italic">"Patience is our primary ingredient."</h2>
+            <p class="text-gray-400 font-light leading-loose tracking-wide">
+                Golus Catering specializes in the art of the long-wait. From our week-old brisket to our monthly-matured dips, we embrace the natural evolution of food. We believe flavor shouldn't be rushed—it should be allowed to settle until it reaches its most distinctive character.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-20 px-8 text-center border-t border-gray-100">
+        <div class="brand-font text-4xl mb-8 tracking-[0.3em]">GOLUS</div>
+        <div class="flex flex-col space-y-4 mb-12 text-sm font-light tracking-widest text-gray-500 uppercase">
+            <p>Aged to Perfection • Prepared with Apathy</p>
+            <p>goluscatering@gmail.com</p>
+        </div>
+        <p class="text-[8px] text-gray-300 uppercase tracking-widest">© 2026 Golus Culinary Group. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Scroll Reveal Animation
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        window.addEventListener("load", reveal); // Run on initial load
+
+        // Smooth Scroll for Navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 </body>
 </html>
+
