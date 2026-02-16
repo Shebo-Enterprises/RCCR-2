@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" >
+<style>
+table {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 2px;
+    border-color: white;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 200px; /* Corrected: removed space before px */
+    background-color: #ffffff;
+}
+li a {
+    display: block;
+    color: #000;
+    padding: 8px 16px;
+    text-decoration: none;
+    font-family: verdana;
+    text-align: left;
+}
+/* change the link color on hover */
+li a:hover {
+    background-color: #555;
+    color: white;
+}
+</style>
+<title>Rabbinical Council of The Charles River </title>
+<META NAME="keywords" CONTENT="Eruv Boston Judaism Sabbath Brookline Newton Brighton Allston Nonantum Sacred Space Synagogue RCCR">
+<script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GOOGLE_ANALYTICS_ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'YOUR_GOOGLE_ANALYTICS_ID');
+</script>
+<!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+<!-- Add Firebase products that you want to use -->
+<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body bgcolor="white">
+<table width="100%" cellpadding="4" border="0">
+<tr>
+    <td valign="top" width="75%">
+        <div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River </div>
+    </td>
+    <td valign="right" width="25%">
+        <img style="max-width: 100%; height: auto;" src="Rabbinical Council (1) (1).png" alt="Rabbinical Council Logo">
+    </td>
+</tr>
+<tr>
+    <td align="center" colspan="2">
+        <div style="font-family: verdana; font-size:20px; font-weight:bold; width=300px;">Serving the community</div>
+    </td>
+</tr>
+<tr>
+    <td colspan="2">
+        <hr size="5" style="color: #0000FF">
+    </td>
+</tr>
+</table>
+<table>
+<tr><td colspan="3" align="right"><font size="-1" face="Arial">
+
+</font></td>
+</tr>
+<tr>
+<td width="10%" align="center" valign="top">
+<ul id="sidebar-links">
+  <!-- Links loaded from Firebase -->
+</ul>
+</td>
+<td colspan="2">
+<div align="center">
+<table border="3" cellpadding="3" bordercolor="blue">
+<tr>
+<td valign="top" align="center" valign="center">
+
+<p>
+<font face="Verdana" size="-1"><b>Our Mission:</b> The RCCR focuses on serving the Charles River area with halachic expertise since now. We offer a wide variety of services, such as kashrus, halachic debating, rabbinical counciling, and more.
+<p>
+
+<p>
+<hr>
+<p>
+<table width="100%"> <!-- Ensure this table takes full width for the boxes -->
+<tr id="feature-box-container-row">
+    <!-- Feature boxes will be loaded here by JavaScript -->
+    <td width="302" valign="top"> &nbsp; <!-- Original first empty cell, adjust if needed --> </td>
+</table>
+<p>
+<table> <!-- Support/Donate Table -->
+<tr bgcolor="#e0ffe0">
+<td valign="top" width="600"><font size="-1">
+<b>Support the RCCR</b>
+<p>
+The continued operation of the RCCR relies on community support. Please consider contributing to help us maintain our vital services.
+<p>
+Information about our fundraising efforts and how you can participate will be posted here.
+<p>
+Need our physical street mailing address? Use the Contact Link to the left...
+<p>
+</td><td width="100" bgcolor="#006400">&nbsp;</td><td valign="top"><font size="-1">
+<b>Donate via wire:</b>
+<p>Email donations@rebchardle.org
+<div align="center">
+</div>
+<hr>
+</td></tr></table>
+<p>
+
+        <!-- NEWS SECTION START -->
+        <div style="margin-top: 30px; margin-bottom: 20px; text-align: left;">
+            <div style="font-family: verdana; font-size:18px; font-weight:bold; margin-bottom: 5px;">Latest News</div>
+            <hr size="3" style="color: #0000FF; margin-bottom: 15px; margin-left:0;">
+            <!-- News items will be loaded here by JavaScript -->
+            <table id="news-list-container" width="100%" cellpadding="5" border="0" style="font-family: Verdana; font-size: small;">
+                <!-- Example:
+                <tr><td colspan="2"><p>Loading news...</p></td></tr>
+                -->
+            </table>
+        </div>
+        <!-- NEWS SECTION END -->
+
+<div align="left">
+<hr>
+<table>
+<tr>
+
+<td>
+</td>
+</tr>
+</table>
+
+<hr size="2" style="color: #0000FF">
+<p>
+</td>
+</tr>
+<tr><td colspan="3"><font size="-2" face="verdana">Copyright, RCCR , <script>document.write(new Date().getFullYear())</script></font>
+<br>
+<p>
+<FONT face=arial,helvetica,sans-serif color=#000000 size="-2">Powered By: Shebo Enterprises <a href="admin.html">Admin Log-in</a></FONT>
+</td></tr>
+</table>
+
+<script>
+    // Replace this with your actual Firebase project configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+  authDomain: "rccr-main.firebaseapp.com",
+  projectId: "rccr-main",
+  storageBucket: "rccr-main.firebasestorage.app",
+  messagingSenderId: "221328154434",
+  appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+  measurementId: "G-97BBMTGDR0"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    function renderSidebarLinks() {
+        const ul = document.getElementById('sidebar-links');
+        if (!ul) return;
+        ul.innerHTML = '<li>Loading...</li>';
+        db.collection('links').orderBy('order').get().then(qs => {
+            ul.innerHTML = '';
+            if (qs.empty) {
+                ul.innerHTML = '<li><a href="index.html">Home</a></li>';
+                return;
+            }
+            qs.forEach(doc => {
+                const l = doc.data();
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = l.text;
+                a.href = l.url;
+                if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        }).catch(err => {
+            console.error('Error loading links:', err);
+            ul.innerHTML = '<li>Error loading links</li>';
+        });
+    }
+
+    function loadPublicFeatureBoxes() {
+        const containerRow = document.getElementById('feature-box-container-row');
+        // Clear existing content except the first empty cell if it's meant to be a permanent spacer
+        const firstCell = containerRow.querySelector('td[width="302"]');
+        containerRow.innerHTML = ''; // Clear all
+        if (firstCell) containerRow.appendChild(firstCell); // Re-add if it's a permanent spacer
+        else { // If the first cell wasn't a spacer, add a placeholder for loading
+             const loadingCell = document.createElement('td');
+             loadingCell.colSpan = 5; // Adjust if more boxes
+             loadingCell.innerHTML = '<p>Loading feature boxes...</p>';
+             containerRow.appendChild(loadingCell);
+        }
+
+
+        db.collection("featureBoxes").orderBy("order").get().then((querySnapshot) => {
+            if (firstCell) { /* We keep the first cell */ }
+            else containerRow.innerHTML = ''; // Clear loading message if no permanent first cell
+
+            if (querySnapshot.empty) {
+                const emptyCell = document.createElement('td');
+                emptyCell.innerHTML = '<p>No feature boxes available.</p>';
+                if(!firstCell) containerRow.appendChild(emptyCell);
+                // If firstCell exists, we might not want to show this message or append it differently
+                return;
+            }
+
+            querySnapshot.forEach((doc, index) => {
+                const fb = doc.data();
+                if (index > 0 || !firstCell) { // Add spacer if not the first item or if no permanent first spacer
+                    const spacerCell = document.createElement('td');
+                    spacerCell.width = "50";
+                    spacerCell.innerHTML = "&nbsp;";
+                    containerRow.appendChild(spacerCell);
+                }
+
+                const boxCell = document.createElement('td');
+                boxCell.bgColor = fb.backgroundColor;
+                boxCell.vAlign = "top";
+                boxCell.style.cssText = "width: 200px; max-width: 200px; vertical-align: top;"; // More explicit width control
+                boxCell.innerHTML = `
+                    ${fb.imageUrl ? `
+                        <img style="width: 150px; height: auto; display: block; margin: 0 auto;" src="${fb.imageUrl}" alt="${fb.title.replace(/"/g, "&quot;")} Image">
+                        <br><br>
+                    ` : ''}
+                    <font style="font-family:Verdana; font-size:small;">
+                        ${fb.title ? `<strong>${fb.title.replace(/</g, "&lt;")}</strong><br>` : ''}
+                        ${fb.text.replace(/</g, "&lt;")}
+                        ${fb.linkText && fb.linkUrl ? `<br><a href="${fb.linkUrl.replace(/"/g, "&quot;")}" ${fb.linkUrl.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : ''}><b>${fb.linkText.replace(/</g, "&lt;")}</b></a>` : ''}
+                    </font>
+                `;
+                containerRow.appendChild(boxCell);
+            });
+        }).catch(error => {
+            console.error("Error loading feature boxes: ", error);
+            if (firstCell) { /* Keep first cell */ } else containerRow.innerHTML = '';
+            const errorCell = document.createElement('td');
+            errorCell.innerHTML = '<p>Error loading feature boxes.</p>';
+            containerRow.appendChild(errorCell);
+        });
+    }
+
+    function loadPublicNews() {
+        const newsContainer = document.getElementById('news-list-container');
+        newsContainer.innerHTML = '<tr><td colspan="2"><p>Loading news...</p></td></tr>'; // Clear previous and show loading
+
+        db.collection("news").orderBy("timestamp", "desc").limit(5).get().then((querySnapshot) => {
+            newsContainer.innerHTML = ''; // Clear loading message
+            if (querySnapshot.empty) {
+                newsContainer.innerHTML = '<tr><td colspan="2"><p>No news items available at the moment.</p></td></tr>';
+                return;
+            }
+            querySnapshot.forEach((doc) => {
+                const news = doc.data();
+                const newsRow = `
+                    <tr>
+                        <td width="120px" valign="top" style="padding-right: 10px; padding-bottom:10px;">
+                            <img src="${news.imageUrl || 'images/news_placeholder_1.jpg'}" alt="News Image" style="width: 100px; height: auto; border: 1px solid #ccc;">
+                        </td>
+                        <td valign="top" style="padding-bottom:10px;">
+                            <b>${news.title}</b><br>
+                            ${news.snippet}
+                        </td>
+                    </tr>
+                    <tr><td colspan="2" style="padding: 5px 0;"><hr style="border: 0; border-top: 1px dashed #ccc; margin:0;"></td></tr>
+                `;
+                newsContainer.innerHTML += newsRow;
+            });
+        }).catch((error) => {
+            console.error("Error loading news: ", error);
+            newsContainer.innerHTML = '<tr><td colspan="2"><p>Error loading news. Please try again later.</p></td></tr>';
+        });
+    }
+
+    // Load news when the page is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        renderSidebarLinks();
+        loadPublicNews();
+        loadPublicFeatureBoxes();
+    });
+</script>
+</body>
+</html>
