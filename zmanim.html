@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zmanim Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .zman-card:last-child { border-bottom: none; }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid #e2e8f0;
+            border-top-color: #2563eb;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen pb-12">
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        <!-- Top Navigation / Search -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-800 text-blue-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Zmanim Explorer
+                </h1>
+                <p class="text-slate-500 mt-1">Personalized Halachic Times</p>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <div class="relative w-full md:w-80">
+                    <input 
+                        type="text" 
+                        id="locationSearch" 
+                        placeholder="Search City or ZIP..."
+                        class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm bg-white"
+                    >
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btnUseGps" class="flex-1 text-xs font-semibold py-1.5 px-3 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-location-crosshairs"></i> Use GPS
+                    </button>
+                    <button id="btnSetDefault" class="flex-1 text-xs font-semibold py-1.5 px-3 rounded-lg bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-heart"></i> Save as Default
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Banner -->
+        <div id="locationStatus" class="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 px-1">
+            <span id="sourceIndicator">Loading location settings...</span>
+        </div>
+
+        <!-- Date & Location Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-4">
+                    <button id="prevDay" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="text-center md:text-left min-w-[180px]">
+                        <h2 id="displayDate" class="text-xl font-bold text-slate-800">...</h2>
+                        <p id="hebrewDate" class="text-blue-600 font-medium text-sm">--</p>
+                    </div>
+                    <button id="nextDay" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3 bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
+                    <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="text-sm overflow-hidden">
+                        <p id="locationName" class="font-bold truncate max-w-[200px]">Detecting...</p>
+                        <p id="timezone" class="opacity-75 text-[10px] font-mono uppercase tracking-tighter">--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading / Error States -->
+        <div id="loader" class="hidden flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-slate-500 font-medium">Fetching Times...</p>
+        </div>
+
+        <div id="errorView" class="hidden bg-red-50 border border-red-100 text-red-700 p-8 rounded-2xl text-center">
+            <i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i>
+            <p id="errorMessage" class="font-bold">An error occurred</p>
+            <button onclick="handleGpsRequest()" class="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                Retry with GPS
+            </button>
+        </div>
+
+        <!-- Zmanim Results -->
+        <div id="zmanimGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-amber-50 p-4 border-b border-amber-100">
+                    <h3 class="text-amber-800 font-bold flex items-center gap-2 uppercase text-xs tracking-widest">
+                        <i class="fa-solid fa-sun text-sm"></i> Morning
+                    </h3>
+                </div>
+                <div id="morningZmanim"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-indigo-50 p-4 border-b border-indigo-100">
+                    <h3 class="text-indigo-800 font-bold flex items-center gap-2 uppercase text-xs tracking-widest">
+                        <i class="fa-solid fa-moon text-sm"></i> Evening
+                    </h3>
+                </div>
+                <div id="eveningZmanim"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'zmanim_explorer_settings';
+        let currentDate = new Date();
+        let currentLocParams = { geonameid: 281184 }; // Jerusalem Default
+        let isUsingGps = false;
+
+        const morningKeys = [
+            { id: 'alotHaShachar', label: 'Alot HaShachar', desc: 'Dawn (16.1°)', icon: 'fa-arrow-up-right-dots' },
+            { id: 'misheyakir', label: 'Misheyakir', desc: 'Earliest Tallis', icon: 'fa-eye' },
+            { id: 'sunrise', label: 'Sunrise', desc: 'Hanetz HaChama', icon: 'fa-sun' },
+            { id: 'sofZmanShmaMGA', label: 'Krias Shema (MGA)', desc: '72 min Magen Avraham', icon: 'fa-clock' },
+            { id: 'sofZmanShma', label: 'Krias Shema (Gra)', desc: 'Gra - 3 Proportional Hours', icon: 'fa-clock' },
+            { id: 'sofZmanTfilla', label: 'Zman Tefilla (Gra)', desc: 'Latest Shacharis', icon: 'fa-calendar-check' }
+        ];
+
+        const eveningKeys = [
+            { id: 'chatzot', label: 'Chatzos', desc: 'Proportional Midday', icon: 'fa-arrows-left-right' },
+            { id: 'minchaGedola', label: 'Mincha Gedola', desc: 'Earliest Mincha', icon: 'fa-sun-plant-wilt' },
+            { id: 'minchaKetana', label: 'Mincha Ketana', desc: 'Preferred Mincha', icon: 'fa-stopwatch' },
+            { id: 'plagHaMincha', label: 'Plag HaMincha', desc: '1.25 Hours before Shkiya', icon: 'fa-cloud-sun' },
+            { id: 'sunset', label: 'Sunset', desc: 'Shkiya', icon: 'fa-cloud-sun' },
+            { id: 'tzeit7083deg', label: 'Tzeit HaKochavim', desc: 'Nightfall (7.083°)', icon: 'fa-moon' },
+            { id: 'tzeit85deg', label: 'Tzeit (8.5°)', desc: 'Rabbeinu Tam (Earlier)', icon: 'fa-star' },
+            { id: 'tzeit72min', label: 'Tzeit (72 min)', desc: 'Rabbeinu Tam / Full Night', icon: 'fa-stars' }
+        ];
+
+        // --- Core Functions ---
+
+        function loadSettings() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const settings = JSON.parse(saved);
+                currentLocParams = settings.params;
+                isUsingGps = settings.isGps || false;
+            }
+            updateStatusIndicator();
+        }
+
+        function saveAsDefault() {
+            const settings = {
+                params: currentLocParams,
+                isGps: isUsingGps
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            
+            // Temporary visual feedback
+            const btn = document.getElementById('btnSetDefault');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+            btn.classList.add('bg-green-100', 'text-green-700');
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-green-100', 'text-green-700');
+            }, 2000);
+        }
+
+        function updateStatusIndicator() {
+            const indicator = document.getElementById('sourceIndicator');
+            if (isUsingGps) {
+                indicator.innerHTML = '<span class="text-blue-600"><i class="fa-solid fa-location-crosshairs"></i> Using Live GPS Location</span>';
+            } else {
+                indicator.innerHTML = '<span class="text-slate-500"><i class="fa-solid fa-heart"></i> Using Saved Default Location</span>';
+            }
+        }
+
+        async function fetchZmanim() {
+            const loader = document.getElementById('loader');
+            const grid = document.getElementById('zmanimGrid');
+            const errorView = document.getElementById('errorView');
+
+            loader.classList.remove('hidden');
+            grid.classList.add('opacity-40');
+            errorView.classList.add('hidden');
+
+            const dateStr = currentDate.toISOString().split('T')[0];
+            let url = `https://www.hebcal.com/zmanim?cfg=json&date=${dateStr}`;
+
+            if (currentLocParams.zip) url += `&zip=${currentLocParams.zip}`;
+            else if (currentLocParams.lat) url += `&latitude=${currentLocParams.lat}&longitude=${currentLocParams.lng}&tzid=${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+            else url += `&geonameid=${currentLocParams.geonameid}`;
+
+            try {
+                const [zmanimRes, calRes] = await Promise.all([
+                    fetch(url),
+                    fetch(`https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&s=on&start=${dateStr}&end=${dateStr}`)
+                ]);
+
+                if (!zmanimRes.ok) throw new Error('Location data failed to load');
+                
+                const zData = await zmanimRes.json();
+                const cData = await calRes.json();
+
+                updateUI(zData, cData);
+            } catch (err) {
+                document.getElementById('errorMessage').innerText = err.message;
+                errorView.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+                grid.classList.remove('opacity-40');
+            }
+        }
+
+        function updateUI(zData, cData) {
+            document.getElementById('displayDate').innerText = currentDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            
+            const hebDate = (cData.items && cData.items.length > 0) ? cData.items[0].hdate : (cData.hebrew || "Hebrew Date Not Available");
+            document.getElementById('hebrewDate').innerText = hebDate;
+            
+            const loc = zData.location;
+            document.getElementById('locationName').innerText = loc ? (loc.name || loc.title || "Selected Location") : "Unknown Area";
+            document.getElementById('timezone').innerText = loc ? loc.tzid : "--";
+
+            renderList('morningZmanim', morningKeys, zData.times || {});
+            renderList('eveningZmanim', eveningKeys, zData.times || {});
+            updateStatusIndicator();
+        }
+
+        function renderList(containerId, keys, times) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            keys.forEach(k => {
+                const timeStr = times[k.id];
+                let formattedTime = "--:--";
+
+                if (timeStr) {
+                    const timeObj = new Date(timeStr);
+                    formattedTime = timeObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                const div = document.createElement('div');
+                div.className = 'zman-card flex items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors';
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+                            <i class="fa-solid ${k.icon} text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">${k.label}</p>
+                            <p class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">${k.desc}</p>
+                        </div>
+                    </div>
+                    <p class="text-base font-mono font-bold ${formattedTime === '--:--' ? 'text-slate-300' : 'text-blue-600'}">${formattedTime}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function handleGpsRequest() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentLocParams = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        isUsingGps = true;
+                        fetchZmanim();
+                    },
+                    (err) => {
+                        alert("Could not access GPS. Please ensure location services are enabled.");
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        // --- Events ---
+
+        document.getElementById('btnUseGps').onclick = handleGpsRequest;
+        document.getElementById('btnSetDefault').onclick = saveAsDefault;
+
+        document.getElementById('prevDay').onclick = () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            fetchZmanim();
+        };
+
+        document.getElementById('nextDay').onclick = () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            fetchZmanim();
+        };
+
+        document.getElementById('locationSearch').onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                const val = e.target.value.trim();
+                if (!val) return;
+                
+                isUsingGps = false; // Disable GPS mode if manual search is used
+                if (/^\d{5}$/.test(val)) {
+                    currentLocParams = { zip: val };
+                } else {
+                    currentLocParams = { geonameid: val };
+                }
+                fetchZmanim();
+            }
+        };
+
+        // --- Init ---
+        window.onload = () => {
+            loadSettings();
+            // If GPS was the saved preference, try to get it
+            if (isUsingGps) {
+                handleGpsRequest();
+            } else {
+                fetchZmanim();
+            }
+        };
+    </script>
+</body>
+</html>
