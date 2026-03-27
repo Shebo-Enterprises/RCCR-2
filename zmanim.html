@@ -20,7 +20,10 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .tab-active { border-bottom: 2px solid #2563eb; color: #2563eb; }
+        .candle-card {
+            background: linear-gradient(to right, #fff7ed, #ffffff);
+            border-left: 4px solid #f59e0b !important;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen pb-12">
@@ -170,7 +173,6 @@
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
             
-            // Temporary visual feedback
             const btn = document.getElementById('btnSetDefault');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
@@ -200,19 +202,25 @@
             errorView.classList.add('hidden');
 
             const dateStr = currentDate.toISOString().split('T')[0];
-            let url = `https://www.hebcal.com/zmanim?cfg=json&date=${dateStr}`;
+            
+            // Construct Zmanim URL
+            let zmanimUrl = `https://www.hebcal.com/zmanim?cfg=json&date=${dateStr}`;
+            // Construct Calendar URL (for Candle Lighting and Hebrew Date)
+            let calendarUrl = `https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&s=on&start=${dateStr}&end=${dateStr}`;
 
-            if (currentLocParams.zip) url += `&zip=${currentLocParams.zip}`;
-            else if (currentLocParams.lat) url += `&latitude=${currentLocParams.lat}&longitude=${currentLocParams.lng}&tzid=${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
-            else url += `&geonameid=${currentLocParams.geonameid}`;
+            const applyParams = (baseUrl) => {
+                if (currentLocParams.zip) return baseUrl + `&zip=${currentLocParams.zip}`;
+                if (currentLocParams.lat) return baseUrl + `&latitude=${currentLocParams.lat}&longitude=${currentLocParams.lng}&tzid=${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+                return baseUrl + `&geonameid=${currentLocParams.geonameid}`;
+            };
 
             try {
                 const [zmanimRes, calRes] = await Promise.all([
-                    fetch(url),
-                    fetch(`https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&min=on&mod=on&nx=on&ss=on&mf=on&c=on&s=on&start=${dateStr}&end=${dateStr}`)
+                    fetch(applyParams(zmanimUrl)),
+                    fetch(applyParams(calendarUrl))
                 ]);
 
-                if (!zmanimRes.ok) throw new Error('Location data failed to load');
+                if (!zmanimRes.ok || !calRes.ok) throw new Error('Data failed to load');
                 
                 const zData = await zmanimRes.json();
                 const cData = await calRes.json();
@@ -237,14 +245,39 @@
             document.getElementById('locationName').innerText = loc ? (loc.name || loc.title || "Selected Location") : "Unknown Area";
             document.getElementById('timezone').innerText = loc ? loc.tzid : "--";
 
+            // Process Evening list to check for candle lighting
+            const candleItem = cData.items?.find(item => item.category === 'candles');
+            
             renderList('morningZmanim', morningKeys, zData.times || {});
-            renderList('eveningZmanim', eveningKeys, zData.times || {});
+            renderList('eveningZmanim', eveningKeys, zData.times || {}, candleItem);
             updateStatusIndicator();
         }
 
-        function renderList(containerId, keys, times) {
+        function renderList(containerId, keys, times, candleItem = null) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
+
+            // If it's the evening container and we have a candle lighting time, prepend it
+            if (containerId === 'eveningZmanim' && candleItem) {
+                const candleTime = new Date(candleItem.date);
+                const formattedCandles = candleTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const candleDiv = document.createElement('div');
+                candleDiv.className = 'zman-card candle-card flex items-center justify-between p-4 border-b border-slate-100 hover:bg-orange-50 transition-colors';
+                candleDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                            <i class="fa-solid fa-fire-burner text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-amber-900 text-sm">Candle Lighting</p>
+                            <p class="text-[9px] uppercase tracking-wider text-amber-600 font-bold">Shabbat Starts</p>
+                        </div>
+                    </div>
+                    <p class="text-base font-mono font-bold text-amber-600">${formattedCandles}</p>
+                `;
+                container.appendChild(candleDiv);
+            }
 
             keys.forEach(k => {
                 const timeStr = times[k.id];
@@ -310,7 +343,7 @@
                 const val = e.target.value.trim();
                 if (!val) return;
                 
-                isUsingGps = false; // Disable GPS mode if manual search is used
+                isUsingGps = false;
                 if (/^\d{5}$/.test(val)) {
                     currentLocParams = { zip: val };
                 } else {
@@ -323,7 +356,6 @@
         // --- Init ---
         window.onload = () => {
             loadSettings();
-            // If GPS was the saved preference, try to get it
             if (isUsingGps) {
                 handleGpsRequest();
             } else {
