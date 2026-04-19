@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Viewer - RCCR</title>
+    <!-- Bootstrap 3 CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body { font-family: Verdana, Geneva, sans-serif; padding-top: 30px; background-color: #fff; }
+        .form-container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; border-radius: 4px; }
+        /* Force Verdana on all Bootstrap elements */
+        .form-control, .btn, label, h1, p, .help-block { font-family: Verdana, Geneva, sans-serif !important; }
+        .form-header { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .form-header h1 { font-size: 24px; color: #333; margin-top: 0; }
+        .success-view { text-align: center; padding: 40px 0; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div id="loading" class="text-center"><h4>Loading form...</h4></div>
+            
+            <div id="form-content" style="display:none;">
+                <div class="form-header">
+                    <h1 id="form-title"></h1>
+                    <p id="form-desc"></p>
+                </div>
+                <form id="public-form">
+                    <div id="fields-container"></div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Submit Response</button>
+                </form>
+            </div>
+
+            <div id="success-view" style="display:none;" class="success-view">
+                <div class="alert alert-success">
+                    <h3 style="margin-top:0;">✔ Submitted</h3>
+                    <p id="success-text"></p>
+                </div>
+                <a href="../index.html" class="btn btn-default">Return to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+            authDomain: "rccr-main.firebaseapp.com",
+            projectId: "rccr-main",
+            storageBucket: "rccr-main.firebasestorage.app",
+            messagingSenderId: "221328154434",
+            appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+            measurementId: "G-97BBMTGDR0"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const formId = new URLSearchParams(window.location.search).get('id');
+
+        if (!formId) {
+            document.getElementById('loading').innerText = "Error: Form ID missing.";
+        } else {
+            db.collection("forms").doc(formId).get().then(doc => {
+                if (!doc.exists) {
+                    document.getElementById('loading').innerText = "Error: Form not found.";
+                    return;
+                }
+                const data = doc.data();
+                document.getElementById('form-title').innerText = data.title;
+                document.getElementById('form-desc').innerText = data.description || '';
+                
+                const container = document.getElementById('fields-container');
+                data.fields.forEach(f => {
+                    const group = document.createElement('div');
+                    if (f.type === 'checkbox') {
+                        group.className = 'checkbox';
+                        group.innerHTML = `<label><input type="checkbox" name="${f.label}" ${f.required ? 'required' : ''}> <strong>${f.label}${f.required ? ' *' : ''}</strong></label>`;
+                    } else {
+                        group.className = 'form-group';
+                        let labelHtml = `<label class="control-label">${f.label}${f.required ? ' *' : ''}</label>`;
+                        let inputHtml = '';
+                        
+                        if (f.type === 'textarea') {
+                            inputHtml = `<textarea name="${f.label}" class="form-control" ${f.required ? 'required' : ''} rows="4"></textarea>`;
+                        } else if (f.type === 'select') {
+                            inputHtml = `<select name="${f.label}" class="form-control" ${f.required ? 'required' : ''}><option value="">Select...</option>${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}</select>`;
+                        } else {
+                            inputHtml = `<input type="${f.type}" name="${f.label}" class="form-control" ${f.required ? 'required' : ''}>`;
+                        }
+                        group.innerHTML = labelHtml + inputHtml;
+                    }
+                    
+                    group.innerHTML = inputHtml;
+                    container.appendChild(group);
+                });
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('form-content').style.display = 'block';
+                document.getElementById('public-form').onsubmit = async (e) => {
+                    e.preventDefault();
+                    const btn = e.target.querySelector('button');
+                    btn.disabled = true; btn.innerText = "Sending...";
+                    const formData = new FormData(e.target);
+                    const responses = {};
+                    formData.forEach((val, key) => responses[key] = val);
+                    try {
+                        await db.collection("formSubmissions").add({ formId, responses, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                        await db.collection("forms").doc(formId).update({ responseCount: firebase.firestore.FieldValue.increment(1) });
+                        document.getElementById('form-content').style.display = 'none';
+                        document.getElementById('success-text').innerText = data.successMessage || 'Thank you for your response.';
+                        document.getElementById('success-view').style.display = 'block';
+                    } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Submit Response"; }
+                };
+            });
+        }
+    </script>
+</body>
+</html>
