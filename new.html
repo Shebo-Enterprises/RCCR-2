@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectVideo - Seamless Calling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --accent: #3b82f6;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .local-video-small {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 240px;
+            aspect-ratio: 16/9;
+            border-radius: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            z-index: 10;
+            background: #1e293b;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .control-bar {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 20;
+        }
+
+        .btn-circle {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-mute { background: #334155; }
+        .btn-mute.active { background: #ef4444; }
+        
+        .btn-end { background: #ef4444; }
+        .btn-end:hover { background: #dc2626; }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        #setup-screen {
+            display: flex;
+        }
+
+        #call-screen {
+            display: none;
+        }
+
+        video {
+            transform: scaleX(-1); /* Mirror for natural feel */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Setup / Lobby Screen -->
+    <div id="setup-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="max-w-md w-full glass-panel rounded-3xl p-8 shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+                    <i class="fas fa-video text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold">ConnectVideo</h1>
+                <p class="text-slate-400 mt-2">Enter a room name to start your session</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Room Name</label>
+                    <input type="text" id="roomInput" placeholder="e.g. marketing-sync" 
+                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                
+                <div class="relative aspect-video bg-black rounded-xl overflow-hidden mb-6 border border-slate-700">
+                    <video id="previewVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                    <div class="absolute bottom-3 left-3 bg-black/50 px-2 py-1 rounded text-xs">Preview</div>
+                </div>
+
+                <button onclick="startCall()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <span>Join Meeting</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Call Screen -->
+    <div id="call-screen" class="w-full h-full p-4 md:p-8 flex flex-col">
+        <div class="flex-1 video-container">
+            <!-- Remote Video (Large) -->
+            <video id="remoteVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+            
+            <!-- Local Video (Small Overlay) -->
+            <video id="localVideo" autoplay playsinline muted class="local-video-small"></video>
+
+            <!-- Call Info -->
+            <div class="status-badge">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span id="roomDisplayName">Room: General</span>
+                <span class="mx-2 text-slate-500">|</span>
+                <span id="callDuration">00:00</span>
+            </div>
+
+            <!-- Controls -->
+            <div class="control-bar">
+                <button onclick="toggleAudio()" id="audioBtn" class="btn-circle btn-mute" title="Mute Audio">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button onclick="toggleVideo()" id="videoBtn" class="btn-circle btn-mute" title="Stop Video">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button onclick="shareScreen()" class="btn-circle btn-mute" title="Share Screen">
+                    <i class="fas fa-desktop"></i>
+                </button>
+                <button onclick="endCall()" class="btn-circle btn-end" title="End Call">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let localStream;
+        let remoteStream;
+        let peerConnection;
+        let timerInterval;
+        let isMuted = false;
+        let isVideoOff = false;
+
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // Initialize preview on load
+        window.onload = async () => {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('previewVideo').srcObject = localStream;
+            } catch (err) {
+                console.error("Error accessing media devices:", err);
+                showNotification("Please allow camera/microphone access to use this app.");
+            }
+        };
+
+        async function startCall() {
+            const roomName = document.getElementById('roomInput').value || 'General';
+            document.getElementById('roomDisplayName').innerText = `Room: ${roomName}`;
+            
+            // UI Transition
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('call-screen').style.display = 'flex';
+            
+            // Set stream to main UI
+            document.getElementById('localVideo').srcObject = localStream;
+
+            // In a real app, you would initialize WebRTC signaling here
+            // initializeWebRTC();
+            
+            // For demo: Show a placeholder for the remote user after 2 seconds
+            simulateRemoteConnection();
+            startTimer();
+        }
+
+        async function initializeWebRTC() {
+            peerConnection = new RTCPeerConnection(config);
+
+            // Add local tracks to peer connection
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            // Listen for remote tracks
+            peerConnection.ontrack = (event) => {
+                const [remoteStream] = event.streams;
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            };
+
+            // ICE Candidate handling
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    // Send candidate to remote peer via signaling server
+                }
+            };
+        }
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            localStream.getAudioTracks()[0].enabled = !isMuted;
+            const btn = document.getElementById('audioBtn');
+            btn.classList.toggle('active', isMuted);
+            btn.innerHTML = isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+        }
+
+        function toggleVideo() {
+            isVideoOff = !isVideoOff;
+            localStream.getVideoTracks()[0].enabled = !isVideoOff;
+            const btn = document.getElementById('videoBtn');
+            btn.classList.toggle('active', isVideoOff);
+            btn.innerHTML = isVideoOff ? '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+        }
+
+        async function shareScreen() {
+            try {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const videoTrack = screenStream.getVideoTracks()[0];
+                
+                // Switch tracks if PC exists
+                if (peerConnection) {
+                    const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    sender.replaceTrack(videoTrack);
+                }
+
+                document.getElementById('localVideo').srcObject = screenStream;
+
+                videoTrack.onended = () => {
+                    document.getElementById('localVideo').srcObject = localStream;
+                    if (peerConnection) {
+                        const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+                        sender.replaceTrack(localStream.getVideoTracks()[0]);
+                    }
+                };
+            } catch (err) {
+                console.error("Screen share failed:", err);
+            }
+        }
+
+        function endCall() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            location.reload(); // Simple way to reset state
+        }
+
+        function startTimer() {
+            let seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const secs = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('callDuration').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function simulateRemoteConnection() {
+            // This mimics another user joining. 
+            // In reality, your signaling server would trigger this.
+            const remoteVideo = document.getElementById('remoteVideo');
+            
+            // Using a high-quality video placeholder for demonstration
+            remoteVideo.style.filter = "grayscale(20%) brightness(80%)";
+            remoteVideo.poster = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1000";
+            
+            showNotification("Remote user joined the meeting");
+        }
+
+        function showNotification(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-slate-800 border border-blue-500 text-white px-6 py-3 rounded-xl shadow-xl z-[100] animate-bounce';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+    </script>
+</body>
+</html>
