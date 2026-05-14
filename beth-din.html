@@ -34,7 +34,9 @@
         .sidenav li a { color: rgba(255,255,255,0.8) !important; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidenav .logo-area { padding: 40px 20px; text-align: center; background: #1a2327; }
 
-        /* Docket Cards */
+        /* Width & Layout Enhancements */
+        .container { width: 95%; max-width: 1200px; } /* Wider viewer */
+
         .docket-card {
             border-left: 5px solid var(--primary-dark);
             margin-bottom: 20px;
@@ -45,37 +47,43 @@
             padding: 10px 25px;
             border-radius: 50px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin: 2rem 0;
+            margin: 1.5rem 0;
         }
         .search-wrapper input { border-bottom: none !important; margin: 0 !important; box-shadow: none !important; }
 
         /* View Section Styles */
-        #view-section { background: white; padding: 50px; min-height: 800px; }
+        #view-section { 
+            background: white; 
+            padding: 40px; 
+            min-height: 800px; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
+
+        /* Mobile specific adjustments */
+        @media only screen and (max-width: 600px) {
+            #view-section { padding: 20px 15px; }
+            .btn-action-row { display: flex; flex-direction: column; gap: 10px; }
+            .btn-action-row .btn, .btn-action-row .btn-flat { width: 100%; text-align: center; }
+            .docket-header-table td { display: block; width: 100%; border: none; border-bottom: 1px solid #eee; }
+        }
+
         .docket-header-table { width: 100%; border: 1px solid #e0e0e0; margin: 20px 0; }
         .docket-header-table td { border: 1px solid #e0e0e0; padding: 10px; font-size: 0.9rem; }
         
-        /* PIN Modal */
         #pin-modal { max-width: 400px; border-radius: 8px; }
 
-        /* STRTCT PRINT LOGIC */
         @media print {
-            /* Hide everything but the docket content */
             body, html { background: white !important; }
             header, .sidenav, .no-print, .sidenav-overlay, .search-wrapper, #list-section { 
                 display: none !important; 
             }
             header, main, footer { padding-left: 0 !important; margin: 0 !important; }
-            
             #view-section { 
                 display: block !important; 
-                position: absolute;
-                left: 0;
-                top: 0;
                 width: 100%;
                 padding: 0 !important;
                 box-shadow: none !important;
             }
-            .document-content { padding: 0 !important; margin: 0 !important; }
         }
     </style>
 
@@ -99,7 +107,7 @@
         <nav class="transparent z-depth-0">
             <div class="nav-wrapper">
                 <a href="#" data-target="slide-out" class="sidenav-trigger black-text"><i class="material-icons">menu</i></a>
-                <span class="brand-logo center black-text hide-on-med-and-down" style="font-weight: 300; letter-spacing: 2px;">JUDICIAL DOCKET SEARCH</span>
+                <span class="brand-logo center black-text" style="font-weight: 300; letter-spacing: 4px;">DOCKET</span>
             </div>
         </nav>
     </header>
@@ -110,29 +118,31 @@
             <div id="list-section">
                 <div class="search-wrapper row valign-wrapper no-print">
                     <i class="material-icons grey-text">search</i>
-                    <input type="text" id="search-input" class="col s11" placeholder="Search by Docket #, Title, or Date..." onkeyup="filterDockets()">
+                    <input type="text" id="search-input" class="col s11" placeholder="Search records..." onkeyup="filterDockets()">
                 </div>
 
                 <div id="dockets-container" class="row">
                     <div class="col s12 center-align grey-text" style="margin-top: 5rem;">
                         <i class="material-icons" style="font-size: 4rem; opacity: 0.2;">find_in_page</i>
-                        <p>Enter a case ID or keyword to begin search.</p>
+                        <p>Search by Case Name or Docket ID.</p>
                     </div>
                 </div>
             </div>
 
             <!-- View Section -->
             <div id="view-section" style="display: none;">
-                <div class="no-print" style="margin-bottom: 30px; display: flex; gap: 10px;">
-                    <button onclick="showList()" class="btn-flat waves-effect grey lighten-3"><i class="material-icons left">arrow_back</i>Back to Search</button>
-                    <button onclick="window.print()" class="btn waves-effect blue-grey darken-4"><i class="material-icons left">print</i>Print Official Copy</button>
-                    <button onclick="copyPermalink()" class="btn waves-effect blue-grey lighten-1"><i class="material-icons left">link</i>Permalink</button>
+                <div class="no-print btn-action-row" style="margin-bottom: 30px;">
+                    <button onclick="showList()" class="btn-flat waves-effect grey lighten-3"><i class="material-icons left">arrow_back</i>Back</button>
+                    <button onclick="window.print()" class="btn waves-effect blue-grey darken-4"><i class="material-icons left">print</i>Print Copy</button>
+                    <button onclick="copyPermalink()" class="btn waves-effect blue-grey lighten-1">
+                        <i class="material-icons left">link</i><span id="link-btn-text">Permalink</span>
+                    </button>
                 </div>
 
                 <div class="document-content">
                     <div class="center-align">
                         <h4 style="font-family: serif; font-weight: bold; margin-bottom: 5px;">RABBINICAL COUNCIL OF THE CHARLES RIVER</h4>
-                        <h5 style="text-transform: uppercase; letter-spacing: 1px; margin-top: 0;">Beth Din Judicial Docket</h5>
+                        <h5 style="text-transform: uppercase; letter-spacing: 1px; margin-top: 0; font-size: 1.1rem;">Beth Din Judicial Docket</h5>
                     </div>
 
                     <table class="docket-header-table">
@@ -143,12 +153,11 @@
                         </tr>
                     </table>
 
-                    <h4 id="view-docket-title" style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 40px; font-family: serif;"></h4>
+                    <h4 id="view-docket-title" style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 40px; font-family: serif; font-weight: bold;"></h4>
                     <div id="view-docket-content" style="font-family: serif; font-size: 1.2rem; line-height: 1.8; margin-top: 30px;"></div>
 
                     <div style="margin-top: 80px; border-top: 1px solid #eee; padding-top: 20px;" class="grey-text center-align">
                         <p>Official Record Timestamp: <span id="view-docket-date"></span></p>
-                        <p style="font-size: 0.8rem;">Verified by the Clerk of the Beth Din</p>
                     </div>
                 </div>
             </div>
@@ -160,13 +169,12 @@
         <div class="modal-content center-align">
             <i class="material-icons medium red-text text-darken-2">lock</i>
             <h4>Restricted Access</h4>
-            <p>This docket requires a security PIN to view.</p>
+            <p>Enter PIN Code to unlock this docket.</p>
             <div class="input-field">
-                <input type="password" id="pin-input" placeholder="Enter PIN Code" onkeydown="if(event.key==='Enter') submitPin()">
+                <input type="password" id="pin-input" onkeydown="if(event.key==='Enter') submitPin()">
             </div>
         </div>
         <div class="modal-footer">
-            <button onclick="closePinModal()" class="modal-close btn-flat">Cancel</button>
             <button onclick="submitPin()" class="btn blue-grey darken-4">Unlock</button>
         </div>
     </div>
@@ -216,7 +224,7 @@
             const term = document.getElementById('search-input').value.toLowerCase();
             const container = document.getElementById('dockets-container');
             if (!term || term.length < 2) {
-                container.innerHTML = `<div class="col s12 center-align grey-text" style="margin-top: 5rem;"><i class="material-icons" style="font-size: 4rem; opacity: 0.2;">find_in_page</i><p>Enter at least 2 characters to search.</p></div>`;
+                container.innerHTML = `<div class="col s12 center-align grey-text" style="margin-top: 5rem;"><i class="material-icons" style="font-size: 4rem; opacity: 0.2;">find_in_page</i><p>Type to search...</p></div>`;
                 return;
             }
             const filtered = allDockets.filter(d => {
@@ -229,7 +237,7 @@
         function renderDockets(dockets) {
             const container = document.getElementById('dockets-container');
             if (dockets.length === 0) {
-                container.innerHTML = '<div class="col s12 center-align"><p>No matching records found.</p></div>';
+                container.innerHTML = '<div class="col s12 center-align"><p>No records found.</p></div>';
                 return;
             }
             container.innerHTML = '';
@@ -241,19 +249,17 @@
                     <div class="col s12">
                         <div class="card docket-card white">
                             <div class="card-content">
-                                <span class="card-title grey-text text-darken-4" style="font-weight:500;">
+                                <span class="card-title grey-text text-darken-4" style="font-weight:600; font-size:1.3rem;">
                                     ${isPin ? '<i class="material-icons left tiny">lock</i>' : ''}
                                     ${d.title}
                                 </span>
-                                <p class="grey-text">Docket #: ${d.docketNumber || 'Unassigned'} | Filing Date: ${d.filingDate || dateStr}</p>
-                                <p class="truncate" style="margin-top:10px; color:#757575;">
-                                    ${isPin ? '<i>Access restricted. Valid PIN required.</i>' : stripHtml(d.content).substring(0, 150) + '...'}
-                                </p>
+                                <p class="grey-text">Docket: ${d.docketNumber || 'N/A'} | Date: ${d.filingDate || dateStr}</p>
                             </div>
                             <div class="card-action">
-                                <button onclick="viewDocket('${d.id}')" class="btn blue-grey darken-4 waves-effect">
+                                <button onclick="viewDocket('${d.id}')" class="btn blue-grey darken-4 waves-effect col s12 m4">
                                     <i class="material-icons left">visibility</i>Open Docket
                                 </button>
+                                <div class="clearfix"></div>
                             </div>
                         </div>
                     </div>
@@ -304,7 +310,13 @@
 
         function copyPermalink() {
             const url = window.location.origin + window.location.pathname + '?id=' + currentDocketId;
-            navigator.clipboard.writeText(url).then(() => M.toast({html: 'Link Copied'}));
+            navigator.clipboard.writeText(url).then(() => {
+                document.getElementById('link-btn-text').textContent = 'Link Copied!';
+                setTimeout(() => {
+                    document.getElementById('link-btn-text').textContent = 'Permalink';
+                }, 2000);
+                M.toast({html: 'Permalink copied to clipboard'});
+            });
         }
 
         function stripHtml(html) {
@@ -323,11 +335,6 @@
                     container.appendChild(li);
                 });
             });
-        }
-
-        function closePinModal() {
-            pinModalInstance.close();
-            document.getElementById('pin-input').value = '';
         }
     </script>
 </body>
