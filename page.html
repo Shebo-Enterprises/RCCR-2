@@ -13,57 +13,55 @@
     <style>
         :root { --rccr-blue: #1a237e; }
         
-        /* Removed Verdana - Using Modern System Fonts */
         body { 
             display: flex; 
             min-height: 100vh; 
             flex-direction: column; 
             background-color: #fafafa; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-            color: #2c3e50;
         }
         main { flex: 1 0 auto; }
 
-        /* Navbar Styling */
+        /* Navbar - Identical to Home */
         nav { background-color: var(--rccr-blue); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .brand-logo { display: flex; align-items: center; font-weight: 300; }
         .brand-logo img { height: 40px; margin-right: 15px; }
 
-        /* Content Header */
+        /* Hero / Title Section - Identical to Home */
         .page-title-area { background: #fff; padding: 40px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 30px; }
-        #page-title { margin: 0; font-weight: 800; color: var(--rccr-blue); font-size: 2.8rem; letter-spacing: -0.5px; }
+        #page-title { margin: 0; font-weight: 700; color: var(--rccr-blue); }
+        .sub-header { color: #757575; font-size: 1.2rem; margin-top: 10px; }
         
-        /* Content Body */
-        #page-content { font-size: 1.15rem; line-height: 1.8; color: #37474f; }
-        #page-content p { margin-bottom: 1.6rem; }
+        /* Content Panel */
+        #page-content { font-size: 1.1rem; line-height: 1.8; color: #424242; }
+        .main-card { border-radius: 8px; padding: 40px !important; }
         
-        /* Sidebar Links */
-        .collection .collection-item a { color: var(--rccr-blue); font-weight: 500; transition: color 0.2s; }
-        .collection .collection-item a:hover { color: #3949ab; }
-        .collection-header { background: #fdfdfd !important; border-bottom: 2px solid var(--rccr-blue) !important; }
+        /* Sidebar Navigation */
+        .collection .collection-item a { color: var(--rccr-blue); font-weight: 600; }
+        .collection-header { background-color: #f5f5f5 !important; }
 
-        /* Error Reporting UI */
+        /* Status UI */
         #error-report {
             display: none;
             background: #ffcdd2;
             color: #b71c1c;
             padding: 15px;
             border-radius: 4px;
-            margin: 20px 0;
-            font-family: monospace;
+            margin-bottom: 20px;
         }
 
-        footer { padding: 40px 0; border-top: 1px solid #e0e0e0; margin-top: 60px; background: #fff; }
-        .btn-donate { background-color: #ffca28 !important; color: #1a237e !important; font-weight: bold; }
+        /* Footer - Identical to Home */
+        footer.page-footer { background-color: #212121; padding-top: 20px; }
+        .footer-copyright { background-color: #1a1a1a !important; }
     </style>
 
-    <!-- Firebase SDKs (v8) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
 
-    <!-- Fixed Navbar -->
+    <!-- Top Bar -->
     <div class="navbar-fixed">
         <nav>
             <div class="nav-wrapper container">
@@ -77,18 +75,19 @@
         </nav>
     </div>
 
-    <!-- Mobile Sidebar -->
+    <!-- Mobile Nav -->
     <ul class="sidenav" id="mobile-demo">
         <li class="indigo darken-4 white-text" style="padding: 20px;"><b>RCCR Menu</b></li>
     </ul>
 
-    <!-- Dropdown Menu for Extra Links -->
+    <!-- Dropdown for excess links -->
     <ul id="dropdown-more" class="dropdown-content"></ul>
 
     <main>
         <section class="page-title-area">
             <div class="container center-align">
-                <h1 id="page-title">Loading...</h1>
+                <h4 id="page-title">Loading...</h4>
+                <div class="sub-header">Rabbinical Council of The Charles River</div>
             </div>
         </section>
 
@@ -96,52 +95,61 @@
             <div id="error-report"></div>
 
             <div class="row">
-                <!-- Content Area -->
-                <div class="col s12 l9">
-                    <div class="card-panel z-depth-1" style="border-radius: 12px; padding: 40px;">
+                <!-- Main Content Left -->
+                <div class="col s12 m9">
+                    <div class="card-panel main-card z-depth-1">
                         <div id="page-content">
-                            <!-- Preloader -->
-                            <div class="center-align" id="loader">
-                                <div class="preloader-wrapper active">
-                                    <div class="spinner-layer spinner-blue-only">
-                                        <div class="circle-clipper left"><div class="circle"></div></div>
-                                        <div class="gap-patch"><div class="circle"></div></div>
-                                        <div class="circle-clipper right"><div class="circle"></div></div>
-                                    </div>
-                                </div>
+                            <div class="progress indigo lighten-4">
+                                <div class="indeterminate indigo"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sidebar Navigation -->
-                <div class="col s12 l3">
-                    <ul class="collection with-header z-depth-1" id="sidebar-links" style="border-radius: 8px; overflow: hidden;">
-                        <li class="collection-header"><h6>Resources</h6></li>
-                    </ul>
-
-                    <div class="card indigo darken-4" style="border-radius: 12px;">
+                <!-- Sidebar Right -->
+                <div class="col s12 m3">
+                    <div class="card indigo darken-4">
                         <div class="card-content white-text">
-                            <span class="card-title" style="font-size: 1.2rem; font-weight: bold;">Support RCCR</span>
-                            <p style="font-size: 0.9rem; opacity: 0.85;">Help protect community standards.</p>
+                            <span class="card-title" style="font-size: 1.2rem;">Support</span>
+                            <p style="font-size: 0.85rem; opacity: 0.8;">Your contributions support our community kashrus efforts.</p>
                         </div>
                         <div class="card-action">
-                            <a href="mailto:donations@rebchardle.org" class="amber-text">Make a Donation →</a>
+                            <a href="mailto:donations@rebchardle.org" class="amber-text">Donate Now</a>
                         </div>
                     </div>
+
+                    <ul class="collection with-header z-depth-1" id="side-nav-links" style="border-radius: 8px;">
+                        <li class="collection-header"><h6>Resources</h6></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="center">
+    <!-- Footer -->
+    <footer class="page-footer">
         <div class="container">
-            <p class="grey-text text-darken-1">&copy; <span id="year"></span> RCCR. All Rights Reserved.</p>
-            <p class="grey-text" style="font-size: 0.85rem;">Powered by Shebo Enterprises | <a href="admin.html" class="grey-text">Admin Portal</a></p>
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">RCCR</h5>
+                    <p class="grey-text text-lighten-4">Excellence in Halachic Leadership and Community Service.</p>
+                </div>
+                <div class="col l4 offset-l2 s12">
+                    <h5 class="white-text">Administrative</h5>
+                    <ul>
+                        <li><a class="grey-text text-lighten-3" href="admin.html">Admin Login</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            <div class="container">
+                © <span id="year"></span> RCCR | Powered by Shebo Enterprises
+            </div>
         </div>
     </footer>
 
-    <!-- Materialize JS -->
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
     <script>
@@ -162,7 +170,7 @@
         function reportError(msg) {
             const box = document.getElementById('error-report');
             box.style.display = 'block';
-            box.innerHTML = `<b>Database Error:</b> ${msg}`;
+            box.innerHTML = `<b>Status:</b> ${msg}`;
         }
 
         function getParam(name) {
@@ -170,11 +178,11 @@
             return params.get(name) || '';
         }
 
-        // LOAD NAVIGATION
+        // Navigation Loader
         function loadNav() {
             db.collection('links').orderBy('order').get().then(qs => {
                 const navLinks = document.getElementById('nav-links');
-                const sidebarLinks = document.getElementById('sidebar-links');
+                const sideLinks = document.getElementById('side-nav-links');
                 const mobileLinks = document.getElementById('mobile-demo');
                 const dropdown = document.getElementById('dropdown-more');
 
@@ -184,7 +192,7 @@
                     const liHtml = `<li><a href="${l.url}" ${l.targetBlank ? 'target="_blank"' : ''}>${l.text}</a></li>`;
                     
                     mobileLinks.innerHTML += liHtml;
-                    sidebarLinks.innerHTML += `<li class="collection-item"><a href="${l.url}">${l.text}</a></li>`;
+                    sideLinks.innerHTML += `<li class="collection-item"><a href="${l.url}">${l.text}</a></li>`;
 
                     if (count < 5) {
                         navLinks.innerHTML += liHtml;
@@ -199,33 +207,33 @@
 
                 M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), { coverTrigger: false });
                 M.Sidenav.init(document.querySelectorAll('.sidenav'));
-            }).catch(err => reportError('Nav: ' + err.message));
+            }).catch(err => reportError('Links failed: ' + err.message));
         }
 
-        // LOAD PAGE CONTENT
+        // Page Content Loader
         function loadPage() {
             const slug = getParam('slug');
             const titleEl = document.getElementById('page-title');
             const contentEl = document.getElementById('page-content');
 
             if (!slug) {
-                titleEl.textContent = "Page Not Found";
-                contentEl.innerHTML = "<p>Please select a resource from the menu.</p>";
+                titleEl.textContent = "Information";
+                contentEl.innerHTML = "<p>Please select a page from the menu.</p>";
                 return;
             }
 
             db.collection('pages').where('slug', '==', slug).limit(1).get().then(qs => {
                 if (qs.empty) {
-                    titleEl.textContent = "404 - Not Found";
-                    contentEl.innerHTML = "<p>The requested document could not be found.</p>";
+                    titleEl.textContent = "Not Found";
+                    contentEl.innerHTML = "<p>The requested page could not be found.</p>";
                     return;
                 }
                 const page = qs.docs[0].data();
                 titleEl.textContent = page.title || slug;
-                contentEl.innerHTML = page.contentHtml || '<p>No content available for this page.</p>';
+                contentEl.innerHTML = page.contentHtml || '<p>No content provided.</p>';
             }).catch(err => {
-                reportError('Page Content: ' + err.message);
-                titleEl.textContent = "Error";
+                reportError('Page Error: ' + err.message);
+                titleEl.textContent = "Error Loading";
             });
         }
 
