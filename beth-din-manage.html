@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beth Din | Management Portal</title>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    
+    <!-- Materialize CSS & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #263238; 
+            --paper-bg: #f5f5f5;
+        }
+
+        body {
+            background-color: var(--paper-bg);
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            color: #333;
+        }
+
+        /* Sidebar Styling */
+        header, main, footer { padding-left: 300px; }
+        @media only screen and (max-width : 992px) {
+            header, main, footer { padding-left: 0; }
+        }
+
+        .sidenav { background-color: var(--primary-dark); }
+        .sidenav li a { color: rgba(255,255,255,0.8) !important; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidenav .logo-area { padding: 40px 20px; text-align: center; background: #1a2327; }
+
+        .container { width: 95%; max-width: 1200px; }
+
+        /* Card Styling */
+        .mgmt-card { padding: 30px; border-radius: 8px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; }
+        
+        /* Editor Styling */
+        #editor-toolbar { background: #eceff1; padding: 5px; border: 1px solid #cfd8dc; border-bottom: none; border-radius: 4px 4px 0 0; }
+        #editor-toolbar button { background: white; border: 1px solid #cfd8dc; margin: 2px; cursor: pointer; padding: 4px 10px; border-radius: 3px; }
+        #docket-editor { 
+            min-height: 400px; 
+            border: 1px solid #cfd8dc; 
+            padding: 20px; 
+            background: white; 
+            overflow-y: auto; 
+            border-radius: 0 0 4px 4px;
+            font-family: serif;
+            font-size: 1.1rem;
+        }
+
+        /* Login Box Styling */
+        .login-box { max-width: 400px; margin: 80px auto; }
+
+        /* List Styling */
+        .docket-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px; 
+            border-bottom: 1px solid #eee; 
+            transition: background 0.2s;
+        }
+        .docket-row:hover { background: #f9f9f9; }
+
+        .btn-success { background-color: #2e7d32 !important; }
+        
+        /* Utility */
+        .chip-status { font-size: 0.7rem; text-transform: uppercase; font-weight: bold; padding: 2px 8px; border-radius: 12px; margin-left: 10px; }
+        .status-public { background: #e8f5e9; color: #2e7d32; }
+        .status-pin { background: #fff3e0; color: #ef6c00; }
+        .status-hidden { background: #eceff1; color: #546e7a; }
+    </style>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <ul id="slide-out" class="sidenav sidenav-fixed">
+        <li class="logo-area">
+            <h5 class="white-text" style="font-weight: 200; font-size: 1.2rem;">Management Portal</h5>
+        </li>
+        <li><a href="beth-din.html"><i class="material-icons white-text">search</i>Public Search</a></li>
+        <li id="logout-li" style="display:none;"><a href="#" onclick="handleLogout()"><i class="material-icons red-text">exit_to_app</i>Logout</a></li>
+    </ul>
+
+    <header>
+        <nav class="transparent z-depth-0">
+            <div class="nav-wrapper">
+                <a href="#" data-target="slide-out" class="sidenav-trigger black-text"><i class="material-icons">menu</i></a>
+                <span class="brand-logo center black-text" style="font-weight: 300; letter-spacing: 4px;">DOCKET</span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+
+            <!-- Auth Section: Login Form -->
+            <div id="login-form" class="login-box" style="display: none;">
+                <div class="mgmt-card center-align">
+                    <i class="material-icons large blue-grey-text">account_circle</i>
+                    <h4>Staff Login</h4>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="input-field">
+                            <input type="email" id="login-email" required>
+                            <label for="login-email">Email Address</label>
+                        </div>
+                        <div class="input-field">
+                            <input type="password" id="login-password" required>
+                            <label for="login-password">Password</label>
+                        </div>
+                        <button type="submit" class="btn blue-grey darken-4 waves-effect waves-light w100" style="width:100%">Login</button>
+                    </form>
+                    <p id="login-error" class="red-text" style="margin-top: 15px;"></p>
+                </div>
+            </div>
+
+            <!-- Management Content -->
+            <div id="management-content" style="display: none;">
+                
+                <!-- Status Bar -->
+                <div class="row valign-wrapper" style="margin-top: 20px;">
+                    <div class="col s12 m6">
+                        <p class="grey-text">Logged in: <strong id="user-display" class="black-text"></strong></p>
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div id="list-view" class="mgmt-card">
+                    <div class="row">
+                        <div class="col s12 m6">
+                            <button onclick="showCreateMode()" class="btn btn-success waves-effect">
+                                <i class="material-icons left">add</i>New Docket
+                            </button>
+                        </div>
+                        <div class="col s12 m6">
+                            <div class="input-field" style="margin: 0;">
+                                <i class="material-icons prefix">search</i>
+                                <input type="text" id="admin-search" onkeyup="renderAdminList()" placeholder="Filter dockets...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="admin-dockets-list">
+                        <div class="center-align grey-text" style="padding: 50px;">
+                            <div class="preloader-wrapper small active">
+                                <div class="spinner-layer spinner-blue-only">
+                                  <div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor View -->
+                <div id="editor-view" class="mgmt-card" style="display: none;">
+                    <h4 id="editor-heading" style="font-weight: 300;">Edit Docket</h4>
+                    <input type="hidden" id="edit-docket-id">
+                    
+                    <div class="input-field">
+                        <input type="text" id="docket-title-input" class="validate" style="font-size: 1.5rem;">
+                        <label for="docket-title-input">Docket Title / Case Name</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12 m4">
+                            <input type="text" id="docket-number" readonly class="grey-text text-darken-1">
+                            <label class="active">Docket Number (Auto)</label>
+                        </div>
+                        <div class="input-field col s12 m4">
+                            <input type="date" id="filing-date">
+                            <label class="active">Filing Date</label>
+                        </div>
+                        <div class="input-field col s12 m4">
+                            <input type="text" id="filing-location">
+                            <label for="filing-location">Filing Location</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col s12 m4">
+                            <select id="docket-visibility" onchange="togglePinInput()">
+                                <option value="public">Public</option>
+                                <option value="pin">PIN Protected</option>
+                                <option value="hidden">Hidden</option>
+                            </select>
+                            <label>Visibility Setting</label>
+                        </div>
+                        <div class="input-field col s12 m4" id="pin-wrapper" style="visibility: hidden;">
+                            <input type="text" id="docket-pin" maxlength="8">
+                            <label for="docket-pin">Access PIN (4-8 digits)</label>
+                        </div>
+                    </div>
+
+                    <div class="row grey lighten-4" style="padding: 15px; border-radius: 4px;">
+                        <div class="input-field col s12 m6" style="margin:0;">
+                            <select id="template-select" onchange="applyTemplate()">
+                                <option value="">-- Select Template --</option>
+                                <optgroup label="Premade" id="premade-templates-group"></optgroup>
+                                <optgroup label="My Templates" id="custom-templates-group"></optgroup>
+                            </select>
+                            <label>Content Templates</label>
+                        </div>
+                        <div class="col s12 m6">
+                            <button onclick="deleteSelectedTemplate()" id="btn-delete-template" class="btn-flat red-text" style="display:none; margin-top:10px;">Delete Template</button>
+                        </div>
+                    </div>
+
+                    <div id="editor-toolbar" class="hide-on-small-only">
+                        <button type="button" onclick="document.execCommand('bold',false,null)"><b>B</b></button>
+                        <button type="button" onclick="document.execCommand('italic',false,null)"><i>I</i></button>
+                        <button type="button" onclick="document.execCommand('underline',false,null)"><u>U</u></button>
+                        <button type="button" onclick="document.execCommand('justifyLeft',false,null)"><i class="material-icons" style="font-size:12px">format_align_left</i></button>
+                        <button type="button" onclick="document.execCommand('justifyCenter',false,null)"><i class="material-icons" style="font-size:12px">format_align_center</i></button>
+                        <button type="button" onclick="document.execCommand('insertOrderedList',false,null)">1.</button>
+                        <button type="button" onclick="document.execCommand('insertUnorderedList',false,null)">&bull;</button>
+                    </div>
+                    <div id="docket-editor" contenteditable="true"></div>
+                    
+                    <div style="margin-top: 30px;" class="row">
+                        <div class="col s12 m8">
+                            <button onclick="saveDocket()" class="btn btn-success waves-effect">Save Record</button>
+                            <button onclick="saveAsTemplate()" class="btn blue-grey lighten-1 waves-effect">Save as Template</button>
+                            <button onclick="cancelEdit()" class="btn-flat grey-text">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        // --- YOUR ORIGINAL FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+            authDomain: "rccr-main.firebaseapp.com",
+            projectId: "rccr-main",
+            storageBucket: "rccr-main.firebasestorage.app",
+            messagingSenderId: "221328154434",
+            appId: "1:221328154434:web:a6000a45f5d4ba964532db",
+            measurementId: "G-97BBMTGDR0"
+        };
+
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let allDockets = [];
+        let customTemplates = [];
+
+        const premadeTemplates = {
+            "premade_summons": {
+                name: "Summons",
+                content: "<h3>Summons to Beth Din</h3><p><strong>To:</strong> [Party Name]</p><p>You are hereby summoned to appear before the Rabbinical Council of the Charles River Beth Din regarding the matter of: <strong>[Case Subject]</strong>.</p><p><strong>Date:</strong> [Date]<br><strong>Time:</strong> [Time]<br><strong>Location:</strong> [Location]</p><p>Please contact the Beth Din to confirm your attendance.</p>"
+            },
+            "premade_psak": {
+                name: "Psak Din (Judgment)",
+                content: "<h3>Psak Din</h3><p><strong>Case Reference:</strong> [Case Number]</p><p>The undersigned Dayanim, having heard the claims and evidence presented by both parties, hereby issue the following ruling:</p><ol><li>[Ruling Point 1]</li><li>[Ruling Point 2]</li></ol><p><strong>So Ordered.</strong></p><p>Signed:<br>____________________<br>____________________<br>____________________</p>"
+            }
+        };
+
+        // --- AUTH & INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            M.Sidenav.init(document.querySelectorAll('.sidenav'));
+            M.FormSelect.init(document.querySelectorAll('select'));
+        });
+
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('management-content').style.display = 'block';
+                document.getElementById('logout-li').style.display = 'block';
+                document.getElementById('user-display').textContent = user.email;
+                loadDockets();
+                loadTemplates();
+            } else {
+                document.getElementById('login-form').style.display = 'block';
+                document.getElementById('management-content').style.display = 'none';
+                document.getElementById('logout-li').style.display = 'none';
+            }
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+                document.getElementById('login-error').textContent = err.message;
+            });
+        }
+
+        function handleLogout() { auth.signOut(); }
+
+        // --- DATA LOGIC ---
+        function loadDockets() {
+            db.collection('dockets').orderBy('timestamp', 'desc').get().then(qs => {
+                allDockets = [];
+                qs.forEach(doc => { allDockets.push({ id: doc.id, ...doc.data() }); });
+                renderAdminList();
+            });
+        }
+
+        function loadTemplates() {
+            db.collection('docketTemplates').orderBy('name').get().then(qs => {
+                customTemplates = [];
+                qs.forEach(doc => { customTemplates.push({ id: doc.id, ...doc.data() }); });
+                renderTemplateOptions();
+            });
+        }
+
+        function renderAdminList() {
+            const container = document.getElementById('admin-dockets-list');
+            const term = document.getElementById('admin-search').value.toLowerCase();
+            const filtered = allDockets.filter(d => (d.title && d.title.toLowerCase().includes(term)));
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="center-align grey-text">No records found.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            filtered.forEach(d => {
+                const dateStr = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleDateString() : 'N/A';
+                const visClass = `status-${d.visibility || 'public'}`;
+                
+                const div = document.createElement('div');
+                div.className = 'docket-row';
+                div.innerHTML = `
+                    <div>
+                        <span style="font-weight:600;">${d.title}</span>
+                        <span class="chip-status ${visClass}">${d.visibility || 'public'}</span><br>
+                        <small class="grey-text">${d.docketNumber || 'No ID'} | ${dateStr}</small>
+                    </div>
+                    <div>
+                        <button onclick="editDocket('${d.id}')" class="btn-small blue-grey darken-3 waves-effect">Edit</button>
+                        <button onclick="deleteDocket('${d.id}')" class="btn-small red darken-4 waves-effect">Delete</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- EDITOR LOGIC ---
+        function showCreateMode() {
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('editor-view').style.display = 'block';
+            document.getElementById('editor-heading').textContent = 'Create New Docket';
+            document.getElementById('edit-docket-id').value = '';
+            document.getElementById('docket-title-input').value = '';
+            document.getElementById('docket-number').value = 'Will be generated on save';
+            document.getElementById('filing-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('filing-location').value = '';
+            document.getElementById('docket-visibility').value = 'public';
+            document.getElementById('docket-pin').value = '';
+            document.getElementById('docket-editor').innerHTML = '';
+            togglePinInput();
+            M.updateTextFields();
+            M.FormSelect.init(document.querySelectorAll('select'));
+        }
+
+        function editDocket(id) {
+            const d = allDockets.find(item => item.id === id);
+            if (!d) return;
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('editor-view').style.display = 'block';
+            document.getElementById('edit-docket-id').value = id;
+            document.getElementById('docket-title-input').value = d.title;
+            document.getElementById('docket-number').value = d.docketNumber || 'N/A';
+            document.getElementById('filing-date').value = d.filingDate || '';
+            document.getElementById('filing-location').value = d.filingLocation || '';
+            document.getElementById('docket-visibility').value = d.visibility || 'public';
+            document.getElementById('docket-pin').value = d.pin || '';
+            document.getElementById('docket-editor').innerHTML = d.content;
+            togglePinInput();
+            M.updateTextFields();
+            M.FormSelect.init(document.querySelectorAll('select'));
+        }
+
+        function cancelEdit() {
+            document.getElementById('editor-view').style.display = 'none';
+            document.getElementById('list-view').style.display = 'block';
+        }
+
+        function saveDocket() {
+            const id = document.getElementById('edit-docket-id').value;
+            const title = document.getElementById('docket-title-input').value.trim();
+            const content = document.getElementById('docket-editor').innerHTML;
+            let dNum = document.getElementById('docket-number').value;
+            const visibility = document.getElementById('docket-visibility').value;
+            const pin = document.getElementById('docket-pin').value.trim();
+
+            if (!title) return M.toast({html: 'Title is required'});
+            if (visibility === 'pin' && !/^\d{4,8}$/.test(pin)) return M.toast({html: 'Enter a 4-8 digit PIN'});
+
+            if (dNum === 'Will be generated on save' || !dNum) dNum = 'DN-' + Date.now();
+
+            const data = {
+                title, content, docketNumber: dNum,
+                filingDate: document.getElementById('filing-date').value,
+                filingLocation: document.getElementById('filing-location').value,
+                visibility, pin: (visibility === 'pin') ? pin : null,
+                author: currentUser.email,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            let promise = id ? db.collection('dockets').doc(id).update(data) : db.collection('dockets').add(data);
+            promise.then(() => {
+                M.toast({html: 'Saved successfully'});
+                cancelEdit();
+                loadDockets();
+            }).catch(err => M.toast({html: 'Error: ' + err.message}));
+        }
+
+        function deleteDocket(id) {
+            if (!confirm('Delete this docket permanently?')) return;
+            db.collection('dockets').doc(id).delete().then(() => {
+                allDockets = allDockets.filter(d => d.id !== id);
+                renderAdminList();
+            });
+        }
+
+        function togglePinInput() {
+            const vis = document.getElementById('docket-visibility').value;
+            document.getElementById('pin-wrapper').style.visibility = (vis === 'pin') ? 'visible' : 'hidden';
+        }
+
+        // --- TEMPLATE LOGIC ---
+        function renderTemplateOptions() {
+            const pg = document.getElementById('premade-templates-group');
+            const cg = document.getElementById('custom-templates-group');
+            pg.innerHTML = ''; cg.innerHTML = '';
+
+            for (const [key, val] of Object.entries(premadeTemplates)) {
+                pg.innerHTML += `<option value="${key}">${val.name}</option>`;
+            }
+            customTemplates.forEach(t => {
+                cg.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+            });
+            M.FormSelect.init(document.querySelectorAll('select'));
+        }
+
+        function applyTemplate() {
+            const val = document.getElementById('template-select').value;
+            if (!val) return;
+            const isCustom = customTemplates.find(t => t.id === val);
+            document.getElementById('btn-delete-template').style.display = isCustom ? 'inline-block' : 'none';
+
+            if (document.getElementById('docket-editor').innerHTML.length > 20) {
+                if (!confirm("Overwrite current content?")) return;
+            }
+
+            let content = premadeTemplates[val] ? premadeTemplates[val].content : (isCustom ? isCustom.content : "");
+            document.getElementById('docket-editor').innerHTML = content;
+        }
+
+        function saveAsTemplate() {
+            const content = document.getElementById('docket-editor').innerHTML;
+            const name = prompt("Template name:");
+            if (!content || !name) return;
+            db.collection('docketTemplates').add({
+                name, content, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { loadTemplates(); M.toast({html: 'Template Saved'}); });
+        }
+
+        function deleteSelectedTemplate() {
+            const id = document.getElementById('template-select').value;
+            if (!id || !confirm("Delete template?")) return;
+            db.collection('docketTemplates').doc(id).delete().then(() => { loadTemplates(); });
+        }
+    </script>
+</body>
+</html>
