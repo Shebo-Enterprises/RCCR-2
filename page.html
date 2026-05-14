@@ -13,24 +13,33 @@
     <style>
         :root { --rccr-blue: #1a237e; }
         
-        body { display: flex; min-height: 100vh; flex-direction: column; background-color: #fafafa; font-family: 'Verdana', sans-serif; }
+        /* Removed Verdana - Using Modern System Fonts */
+        body { 
+            display: flex; 
+            min-height: 100vh; 
+            flex-direction: column; 
+            background-color: #fafafa; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            color: #2c3e50;
+        }
         main { flex: 1 0 auto; }
 
-        /* Navbar Logic matching Home Page */
+        /* Navbar Styling */
         nav { background-color: var(--rccr-blue); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .brand-logo { display: flex; align-items: center; font-weight: 300; }
         .brand-logo img { height: 40px; margin-right: 15px; }
 
-        /* Page Content Header */
+        /* Content Header */
         .page-title-area { background: #fff; padding: 40px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 30px; }
-        #page-title { margin: 0; font-weight: 700; color: var(--rccr-blue); font-size: 2.5rem; }
+        #page-title { margin: 0; font-weight: 800; color: var(--rccr-blue); font-size: 2.8rem; letter-spacing: -0.5px; }
         
         /* Content Body */
-        #page-content { font-size: 1.1rem; line-height: 1.8; color: #333; }
-        #page-content p { margin-bottom: 1.5rem; }
+        #page-content { font-size: 1.15rem; line-height: 1.8; color: #37474f; }
+        #page-content p { margin-bottom: 1.6rem; }
         
         /* Sidebar Links */
-        .collection .collection-item a { color: var(--rccr-blue); font-weight: 500; }
+        .collection .collection-item a { color: var(--rccr-blue); font-weight: 500; transition: color 0.2s; }
+        .collection .collection-item a:hover { color: #3949ab; }
         .collection-header { background: #fdfdfd !important; border-bottom: 2px solid var(--rccr-blue) !important; }
 
         /* Error Reporting UI */
@@ -45,15 +54,16 @@
         }
 
         footer { padding: 40px 0; border-top: 1px solid #e0e0e0; margin-top: 60px; background: #fff; }
+        .btn-donate { background-color: #ffca28 !important; color: #1a237e !important; font-weight: bold; }
     </style>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (v8) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
 
-    <!-- Fixed Navbar with Dropdown Support for many links -->
+    <!-- Fixed Navbar -->
     <div class="navbar-fixed">
         <nav>
             <div class="nav-wrapper container">
@@ -72,7 +82,7 @@
         <li class="indigo darken-4 white-text" style="padding: 20px;"><b>RCCR Menu</b></li>
     </ul>
 
-    <!-- "More" Dropdown Menu -->
+    <!-- Dropdown Menu for Extra Links -->
     <ul id="dropdown-more" class="dropdown-content"></ul>
 
     <main>
@@ -83,13 +93,12 @@
         </section>
 
         <div class="container">
-            <!-- Global Error Display -->
             <div id="error-report"></div>
 
             <div class="row">
                 <!-- Content Area -->
                 <div class="col s12 l9">
-                    <div class="card-panel z-depth-1" style="border-radius: 8px; padding: 40px;">
+                    <div class="card-panel z-depth-1" style="border-radius: 12px; padding: 40px;">
                         <div id="page-content">
                             <!-- Preloader -->
                             <div class="center-align" id="loader">
@@ -107,17 +116,17 @@
 
                 <!-- Sidebar Navigation -->
                 <div class="col s12 l3">
-                    <ul class="collection with-header z-depth-1" id="sidebar-links">
+                    <ul class="collection with-header z-depth-1" id="sidebar-links" style="border-radius: 8px; overflow: hidden;">
                         <li class="collection-header"><h6>Resources</h6></li>
                     </ul>
 
-                    <div class="card indigo darken-4" style="border-radius: 8px;">
+                    <div class="card indigo darken-4" style="border-radius: 12px;">
                         <div class="card-content white-text">
-                            <span class="card-title" style="font-size: 1.2rem;">Support RCCR</span>
-                            <p style="font-size: 0.85rem; opacity: 0.9;">Help us maintain community standards.</p>
+                            <span class="card-title" style="font-size: 1.2rem; font-weight: bold;">Support RCCR</span>
+                            <p style="font-size: 0.9rem; opacity: 0.85;">Help protect community standards.</p>
                         </div>
                         <div class="card-action">
-                            <a href="mailto:donations@rebchardle.org" class="amber-text">Donate</a>
+                            <a href="mailto:donations@rebchardle.org" class="amber-text">Make a Donation →</a>
                         </div>
                     </div>
                 </div>
@@ -128,7 +137,7 @@
     <footer class="center">
         <div class="container">
             <p class="grey-text text-darken-1">&copy; <span id="year"></span> RCCR. All Rights Reserved.</p>
-            <p class="grey-text" style="font-size: 0.8rem;">Powered by Shebo Enterprises | <a href="admin.html" class="grey-text">Admin Portal</a></p>
+            <p class="grey-text" style="font-size: 0.85rem;">Powered by Shebo Enterprises | <a href="admin.html" class="grey-text">Admin Portal</a></p>
         </div>
     </footer>
 
@@ -153,7 +162,7 @@
         function reportError(msg) {
             const box = document.getElementById('error-report');
             box.style.display = 'block';
-            box.innerHTML = `<b>System Error:</b> ${msg}`;
+            box.innerHTML = `<b>Database Error:</b> ${msg}`;
         }
 
         function getParam(name) {
@@ -161,7 +170,7 @@
             return params.get(name) || '';
         }
 
-        // LOAD NAVIGATION (Handles infinite links with "More" dropdown)
+        // LOAD NAVIGATION
         function loadNav() {
             db.collection('links').orderBy('order').get().then(qs => {
                 const navLinks = document.getElementById('nav-links');
@@ -174,11 +183,9 @@
                     const l = doc.data();
                     const liHtml = `<li><a href="${l.url}" ${l.targetBlank ? 'target="_blank"' : ''}>${l.text}</a></li>`;
                     
-                    // Add to mobile and sidebar
                     mobileLinks.innerHTML += liHtml;
                     sidebarLinks.innerHTML += `<li class="collection-item"><a href="${l.url}">${l.text}</a></li>`;
 
-                    // Top Nav: First 5 show up, rest go to dropdown
                     if (count < 5) {
                         navLinks.innerHTML += liHtml;
                     } else {
@@ -192,7 +199,7 @@
 
                 M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), { coverTrigger: false });
                 M.Sidenav.init(document.querySelectorAll('.sidenav'));
-            }).catch(err => reportError('Links: ' + err.message));
+            }).catch(err => reportError('Nav: ' + err.message));
         }
 
         // LOAD PAGE CONTENT
@@ -203,22 +210,22 @@
 
             if (!slug) {
                 titleEl.textContent = "Page Not Found";
-                contentEl.innerHTML = "<p>No specific page was requested.</p>";
+                contentEl.innerHTML = "<p>Please select a resource from the menu.</p>";
                 return;
             }
 
             db.collection('pages').where('slug', '==', slug).limit(1).get().then(qs => {
                 if (qs.empty) {
-                    titleEl.textContent = "Error 404";
-                    contentEl.innerHTML = "<p>The requested page content does not exist.</p>";
+                    titleEl.textContent = "404 - Not Found";
+                    contentEl.innerHTML = "<p>The requested document could not be found.</p>";
                     return;
                 }
                 const page = qs.docs[0].data();
                 titleEl.textContent = page.title || slug;
-                contentEl.innerHTML = page.contentHtml || '';
+                contentEl.innerHTML = page.contentHtml || '<p>No content available for this page.</p>';
             }).catch(err => {
-                reportError('Content: ' + err.message);
-                titleEl.textContent = "Connection Error";
+                reportError('Page Content: ' + err.message);
+                titleEl.textContent = "Error";
             });
         }
 
