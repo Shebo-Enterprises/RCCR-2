@@ -11,11 +11,8 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
-        /* Judicial Slate Theme */
         :root {
-            --primary-dark: #263238; /* Slate Blue-Grey */
-            --accent-gold: #b0bec5;
-            --court-white: #ffffff;
+            --primary-dark: #263238; 
             --paper-bg: #f5f5f5;
         }
 
@@ -35,18 +32,14 @@
 
         .sidenav { background-color: var(--primary-dark); }
         .sidenav li a { color: rgba(255,255,255,0.8) !important; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidenav li a:hover { background-color: rgba(255,255,255,0.1) !important; }
         .sidenav .logo-area { padding: 40px 20px; text-align: center; background: #1a2327; }
 
         /* Docket Cards */
         .docket-card {
-            transition: transform 0.2s;
             border-left: 5px solid var(--primary-dark);
-            cursor: pointer;
+            margin-bottom: 20px;
         }
-        .docket-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Search Bar Enhancement */
         .search-wrapper {
             background: white;
             padding: 10px 25px;
@@ -57,18 +50,32 @@
         .search-wrapper input { border-bottom: none !important; margin: 0 !important; box-shadow: none !important; }
 
         /* View Section Styles */
-        #view-section { background: white; padding: 50px; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        #view-section { background: white; padding: 50px; min-height: 800px; }
         .docket-header-table { width: 100%; border: 1px solid #e0e0e0; margin: 20px 0; }
         .docket-header-table td { border: 1px solid #e0e0e0; padding: 10px; font-size: 0.9rem; }
         
         /* PIN Modal */
         #pin-modal { max-width: 400px; border-radius: 8px; }
 
-        /* Printing */
+        /* STRTCT PRINT LOGIC */
         @media print {
-            .no-print { display: none !important; }
-            header, main, footer { padding-left: 0 !important; }
-            #view-section { box-shadow: none; padding: 0; }
+            /* Hide everything but the docket content */
+            body, html { background: white !important; }
+            header, .sidenav, .no-print, .sidenav-overlay, .search-wrapper, #list-section { 
+                display: none !important; 
+            }
+            header, main, footer { padding-left: 0 !important; margin: 0 !important; }
+            
+            #view-section { 
+                display: block !important; 
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+            .document-content { padding: 0 !important; margin: 0 !important; }
         }
     </style>
 
@@ -78,16 +85,12 @@
 </head>
 <body>
 
-    <!-- Sidenav (Separate Site Navigation) -->
-    <ul id="slide-out" class="sidenav sidenav-fixed">
+    <ul id="slide-out" class="sidenav sidenav-fixed no-print">
         <li class="logo-area">
-            <img src="Rabbinical Council (1) (1).png" alt="Logo" style="width: 80px; filter: brightness(0) invert(1);">
             <h5 class="white-text" style="font-weight: 200; font-size: 1.2rem;">Beth Din Portal</h5>
         </li>
         <li><a href="index.html"><i class="material-icons white-text">home</i>Public Home</a></li>
-        <div id="sidebar-links-container">
-            <!-- Loaded via JS -->
-        </div>
+        <div id="sidebar-links-container"></div>
         <li class="divider" style="background-color: rgba(255,255,255,0.1);"></li>
         <li><a href="beth-din-manage.html" class="grey-text"><i class="material-icons grey-text text-lighten-1">lock_open</i>Staff Login</a></li>
     </ul>
@@ -121,17 +124,15 @@
             <!-- View Section -->
             <div id="view-section" style="display: none;">
                 <div class="no-print" style="margin-bottom: 30px; display: flex; gap: 10px;">
-                    <button onclick="showList()" class="btn-flat waves-effect grey lighten-3"><i class="material-icons left">arrow_back</i>Back</button>
-                    <button onclick="window.print()" class="btn waves-effect blue-grey darken-4"><i class="material-icons left">print</i>Print</button>
+                    <button onclick="showList()" class="btn-flat waves-effect grey lighten-3"><i class="material-icons left">arrow_back</i>Back to Search</button>
+                    <button onclick="window.print()" class="btn waves-effect blue-grey darken-4"><i class="material-icons left">print</i>Print Official Copy</button>
                     <button onclick="copyPermalink()" class="btn waves-effect blue-grey lighten-1"><i class="material-icons left">link</i>Permalink</button>
                 </div>
 
-                <!-- Official Document Header -->
                 <div class="document-content">
                     <div class="center-align">
-                        <img src="Rabbinical Council (1) (1).png" alt="Logo" style="max-width: 100px;">
-                        <h4 style="font-family: serif; font-weight: bold;">RABBINICAL COUNCIL OF THE CHARLES RIVER</h4>
-                        <h5 style="text-transform: uppercase; letter-spacing: 1px;">Beth Din Judicial Docket</h5>
+                        <h4 style="font-family: serif; font-weight: bold; margin-bottom: 5px;">RABBINICAL COUNCIL OF THE CHARLES RIVER</h4>
+                        <h5 style="text-transform: uppercase; letter-spacing: 1px; margin-top: 0;">Beth Din Judicial Docket</h5>
                     </div>
 
                     <table class="docket-header-table">
@@ -142,7 +143,7 @@
                         </tr>
                     </table>
 
-                    <h4 id="view-docket-title" style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 40px;"></h4>
+                    <h4 id="view-docket-title" style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-top: 40px; font-family: serif;"></h4>
                     <div id="view-docket-content" style="font-family: serif; font-size: 1.2rem; line-height: 1.8; margin-top: 30px;"></div>
 
                     <div style="margin-top: 80px; border-top: 1px solid #eee; padding-top: 20px;" class="grey-text center-align">
@@ -155,7 +156,7 @@
     </main>
 
     <!-- PIN Modal -->
-    <div id="pin-modal" class="modal">
+    <div id="pin-modal" class="modal no-print">
         <div class="modal-content center-align">
             <i class="material-icons medium red-text text-darken-2">lock</i>
             <h4>Restricted Access</h4>
@@ -170,10 +171,8 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
-        // Firebase Config (Keep original)
         const firebaseConfig = {
             apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
             authDomain: "rccr-main.firebaseapp.com",
@@ -207,7 +206,6 @@
                     if (data.visibility === 'hidden') return;
                     allDockets.push({ id: doc.id, ...data });
                 });
-                
                 const urlParams = new URLSearchParams(window.location.search);
                 const docketId = urlParams.get('id');
                 if (docketId) viewDocket(docketId);
@@ -217,17 +215,14 @@
         function filterDockets() {
             const term = document.getElementById('search-input').value.toLowerCase();
             const container = document.getElementById('dockets-container');
-            
             if (!term || term.length < 2) {
                 container.innerHTML = `<div class="col s12 center-align grey-text" style="margin-top: 5rem;"><i class="material-icons" style="font-size: 4rem; opacity: 0.2;">find_in_page</i><p>Enter at least 2 characters to search.</p></div>`;
                 return;
             }
-
             const filtered = allDockets.filter(d => {
                 let text = (d.title + (d.docketNumber || '') + (d.filingDate || '')).toLowerCase();
                 return text.includes(term);
             });
-
             renderDockets(filtered);
         }
 
@@ -244,7 +239,7 @@
                 
                 const card = `
                     <div class="col s12">
-                        <div class="card docket-card white" onclick="viewDocket('${d.id}')">
+                        <div class="card docket-card white">
                             <div class="card-content">
                                 <span class="card-title grey-text text-darken-4" style="font-weight:500;">
                                     ${isPin ? '<i class="material-icons left tiny">lock</i>' : ''}
@@ -254,6 +249,11 @@
                                 <p class="truncate" style="margin-top:10px; color:#757575;">
                                     ${isPin ? '<i>Access restricted. Valid PIN required.</i>' : stripHtml(d.content).substring(0, 150) + '...'}
                                 </p>
+                            </div>
+                            <div class="card-action">
+                                <button onclick="viewDocket('${d.id}')" class="btn blue-grey darken-4 waves-effect">
+                                    <i class="material-icons left">visibility</i>Open Docket
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -265,7 +265,6 @@
         function viewDocket(id) {
             const docket = allDockets.find(d => d.id === id);
             if (!docket) return;
-
             if (docket.visibility === 'pin') {
                 pendingDocketId = id;
                 pinModalInstance.open();
@@ -293,7 +292,6 @@
             document.getElementById('view-filing-location').textContent = docket.filingLocation || 'N/A';
             document.getElementById('view-docket-content').innerHTML = docket.content;
             document.getElementById('view-docket-date').textContent = docket.timestamp ? new Date(docket.timestamp.seconds * 1000).toLocaleString() : 'N/A';
-            
             document.getElementById('list-section').style.display = 'none';
             document.getElementById('view-section').style.display = 'block';
             window.scrollTo(0,0);
