@@ -3,59 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
     <title>RCCR | Rabbinical Council</title>
     
-    <!-- Materialize CSS -->
+    <!-- Materialize CSS & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
-        :root { --primary-color: #1a237e; }
-        
-        body { 
-            display: flex; min-height: 100vh; flex-direction: column; 
-            background-color: #fcfcfc; font-family: 'Segoe UI', Roboto, sans-serif;
-        }
+        :root { --primary: #1a237e; }
+        body { display: flex; min-height: 100vh; flex-direction: column; background: #f9f9f9; }
         main { flex: 1 0 auto; }
-
-        /* Fluid Layout adjustments */
-        .container { width: 90%; max-width: 1400px; }
+        nav { background: var(--primary); height: 70px; line-height: 70px; }
         
-        /* Animation for fluid loading */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
-
-        /* Handling missing images */
-        .hide-on-error { display: block; }
-        .hide-on-error[src=""], .hide-on-error:not([src]) { display: none !important; }
-
-        /* Dynamic Feature Grid */
+        /* Layout */
+        .container { width: 95%; max-width: 1280px; }
+        .hero { padding: 40px 0; background: white; border-bottom: 1px solid #ddd; margin-bottom: 30px; }
+        
+        /* Grid */
         #feature-box-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .card.feature-card {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100%; /* Ensures all cards in a row stay equal height */
-            transition: box-shadow 0.3s ease;
-        }
+        /* Fluidity & Images */
+        .card { height: 100%; display: flex; flex-direction: column; margin: 0; }
+        .card-content { flex-grow: 1; }
+        .card-image img { object-fit: cover; max-height: 200px; }
+        
+        /* Hide images that fail or are missing */
+        .img-hidden { display: none !important; }
 
-        .card .card-content { flex-grow: 1; }
-
-        /* Nav and Footer */
-        nav { background-color: var(--primary-color); height: 80px; line-height: 80px; }
-        .brand-logo img { height: 50px; vertical-align: middle; }
-        footer.page-footer { background-color: var(--primary-color); margin-top: 40px; }
+        .loading-text { padding: 20px; color: #999; font-style: italic; }
     </style>
 
+    <!-- Firebase SDKs (v8) -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
@@ -63,49 +45,51 @@
 
     <nav>
         <div class="nav-wrapper container">
-            <a href="index.html" class="brand-logo">
-                <img src="Rabbinical Council (1) (1).png" alt="RCCR Logo" onerror="this.style.display='none'">
-                <span class="hide-on-small-only">RCCR</span>
-            </a>
-            <ul class="right hide-on-med-and-down" id="desktop-links"></ul>
+            <a href="#" class="brand-logo left">RCCR</a>
+            <ul id="desktop-links" class="right hide-on-med-and-down"></ul>
         </div>
     </nav>
 
     <main>
-        <div class="section no-pad-bot">
-            <div class="container center">
-                <h3 class="header indigo-text text-darken-4" style="font-weight: 300;">Rabbinical Council of The Charles River</h3>
-                <p class="grey-text text-darken-1">Providing community leadership and halachic guidance.</p>
+        <div class="hero center-align">
+            <div class="container">
+                <h4 class="indigo-text text-darken-4">Rabbinical Council of The Charles River</h4>
+                <p class="flow-text grey-text">Providing halachic expertise and community services.</p>
             </div>
         </div>
 
         <div class="container">
             <div class="row">
-                <!-- Main Content -->
+                <!-- Content -->
                 <div class="col s12 l9">
                     <div id="feature-box-container">
-                        <!-- Content auto-expands here -->
+                        <div class="loading-text">Connecting to community database...</div>
                     </div>
 
-                    <div class="section">
-                        <h5 class="indigo-text"><i class="material-icons left">rss_feed</i>News Updates</h5>
-                        <div id="news-list-container" class="row"></div>
+                    <div class="section" style="margin-top:40px;">
+                        <h5 class="indigo-text"><i class="material-icons left">event_note</i>Latest News</h5>
+                        <div class="divider"></div>
+                        <div id="news-list-container" class="row" style="margin-top:20px;">
+                            <div class="loading-text">Checking for news...</div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Sidebar -->
                 <div class="col s12 l3">
-                    <ul class="collection with-header z-depth-1" id="sidebar-links">
-                        <li class="collection-header"><h6>Resources</h6></li>
-                    </ul>
-
+                    <div class="card-panel white" style="padding: 0;">
+                        <ul class="collection with-header" id="sidebar-links" style="border:none;">
+                            <li class="collection-header"><h6>Resources</h6></li>
+                        </ul>
+                    </div>
+                    
                     <div class="card indigo darken-4">
                         <div class="card-content white-text">
-                            <span class="card-title">Support</span>
-                            <p>Help us maintain our services through your contributions.</p>
+                            <span class="card-title">Support RCCR</span>
+                            <p>Help us maintain our vital services for the Charles River area.</p>
                         </div>
                         <div class="card-action">
-                            <a href="mailto:donations@rebchardle.org" class="amber-text">Donate via Wire</a>
+                            <a href="mailto:donations@rebchardle.org" class="amber-text text-accent-2">Email for Wire Transfer</a>
                         </div>
                     </div>
                 </div>
@@ -113,21 +97,19 @@
         </div>
     </main>
 
-    <footer class="page-footer">
-        <div class="footer-copyright">
-            <div class="container">
-                © <span id="year"></span> RCCR | <a href="admin.html" class="grey-text text-lighten-3">Admin</a>
-                <span class="right hide-on-small-only">Powered by Shebo Enterprises</span>
+    <footer class="page-footer grey darken-3">
+        <div class="container">
+            <div class="row" style="margin-bottom:0; padding: 20px 0;">
+                <div class="col s12 center white-text">
+                    &copy; <span id="year"></span> Rabbinical Council of The Charles River | <a href="admin.html" class="grey-text">Admin</a>
+                </div>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Standard Firebase Init
         const firebaseConfig = {
             apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
             authDomain: "rccr-main.firebaseapp.com",
@@ -137,85 +119,107 @@
             appId: "1:221328154434:web:a6000a45f5d4ba964532db",
             measurementId: "G-97BBMTGDR0"
         };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firebase safely
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.firestore();
 
-        // Helper to remove parent container if image fails
-        function imgError(image) {
-            const container = image.closest('.card-image');
-            if (container) container.remove(); 
-            return true;
+        // Utility to hide broken images and their containers
+        function handleImgError(img) {
+            img.classList.add('img-hidden');
+            const parent = img.closest('.card-image');
+            if(parent) parent.classList.add('img-hidden');
         }
 
-        function renderLinks() {
+        // 1. Load Links
+        function loadLinks() {
             const sidebar = document.getElementById('sidebar-links');
             const desktop = document.getElementById('desktop-links');
-            db.collection('links').orderBy('order').get().then(qs => {
-                qs.forEach(doc => {
-                    const l = doc.data();
-                    const linkHTML = `<li><a href="${l.url}" ${l.targetBlank ? 'target="_blank"' : ''}>${l.text}</a></li>`;
-                    desktop.innerHTML += linkHTML;
-                    sidebar.innerHTML += `<li class="collection-item">${linkHTML.replace('<li>','').replace('</li>','')}</li>`;
-                });
-            });
+            
+            db.collection('links').orderBy('order').get()
+                .then(qs => {
+                    if(qs.empty) { console.warn("No links found in collection 'links'"); return; }
+                    qs.forEach(doc => {
+                        const data = doc.data();
+                        const html = `<li><a href="${data.url}" ${data.targetBlank ? 'target="_blank"' : ''}>${data.text}</a></li>`;
+                        desktop.innerHTML += html;
+                        sidebar.innerHTML += `<li class="collection-item">${html.replace('<li>','').replace('</li>','')}</li>`;
+                    });
+                })
+                .catch(err => console.error("Link Error:", err));
         }
 
-        function loadFeatureBoxes() {
+        // 2. Load Feature Boxes
+        function loadFeatures() {
             const container = document.getElementById('feature-box-container');
-            db.collection("featureBoxes").orderBy("order").get().then((qs) => {
-                container.innerHTML = '';
-                qs.forEach((doc) => {
-                    const fb = doc.data();
+            
+            db.collection("featureBoxes").get().then((qs) => {
+                container.innerHTML = ''; // Clear loading
+                if(qs.empty) { container.innerHTML = '<p>Welcome to RCCR. Check back soon for updates.</p>'; return; }
+                
+                // Sort manually if order field exists
+                const docs = [];
+                qs.forEach(doc => docs.push(doc.data()));
+                docs.sort((a,b) => (a.order || 0) - (b.order || 0));
+
+                docs.forEach(fb => {
                     const card = document.createElement('div');
-                    card.className = 'fade-in';
                     card.innerHTML = `
-                        <div class="card feature-card z-depth-1 hoverable" style="background-color: ${fb.backgroundColor || '#ffffff'}">
+                        <div class="card hoverable" style="background-color: ${fb.backgroundColor || '#fff'}">
                             ${fb.imageUrl ? `
-                            <div class="card-image">
-                                <img src="${fb.imageUrl}" class="hide-on-error" onerror="imgError(this)">
-                            </div>` : ''}
+                                <div class="card-image">
+                                    <img src="${fb.imageUrl}" onerror="handleImgError(this)">
+                                </div>` : ''}
                             <div class="card-content">
-                                <span class="card-title" style="font-weight:500">${fb.title}</span>
-                                <p>${fb.text}</p>
+                                <span class="card-title" style="font-size:1.2rem; font-weight:600;">${fb.title || ''}</span>
+                                <p>${fb.text || ''}</p>
                             </div>
                             ${fb.linkText ? `
-                            <div class="card-action">
-                                <a href="${fb.linkUrl}" class="indigo-text text-darken-4">${fb.linkText}</a>
-                            </div>` : ''}
+                                <div class="card-action">
+                                    <a href="${fb.linkUrl}" class="indigo-text text-darken-4"><b>${fb.linkText}</b></a>
+                                </div>` : ''}
                         </div>`;
                     container.appendChild(card);
                 });
+            }).catch(err => {
+                container.innerHTML = `<p class="red-text">Database Error: ${err.message}</p>`;
             });
         }
 
+        // 3. Load News
         function loadNews() {
             const container = document.getElementById('news-list-container');
-            db.collection("news").orderBy("timestamp", "desc").limit(6).get().then((qs) => {
-                qs.forEach((doc) => {
-                    const news = doc.data();
-                    const newsItem = document.createElement('div');
-                    newsItem.className = 'col s12 m6 fade-in';
-                    newsItem.innerHTML = `
-                        <div class="card horizontal z-depth-0" style="border: 1px solid #eee; background: transparent;">
-                            ${news.imageUrl ? `
-                            <div class="card-image" style="max-width: 100px;">
-                                <img src="${news.imageUrl}" class="hide-on-error" onerror="imgError(this)" style="height:100%; object-fit:cover;">
-                            </div>` : ''}
-                            <div class="card-stacked">
-                                <div class="card-content" style="padding: 10px 15px;">
-                                    <h6 style="margin:0; font-weight:600;">${news.title}</h6>
-                                    <p class="grey-text" style="font-size:0.9rem">${news.snippet}</p>
+            db.collection("news").orderBy("timestamp", "desc").limit(4).get().then((qs) => {
+                container.innerHTML = '';
+                if(qs.empty) { container.innerHTML = '<div class="col s12">No current news announcements.</div>'; return; }
+                
+                qs.forEach(doc => {
+                    const n = doc.data();
+                    container.innerHTML += `
+                        <div class="col s12 m6">
+                            <div class="card horizontal z-depth-1" style="border-radius:8px; overflow:hidden;">
+                                ${n.imageUrl ? `
+                                <div class="card-image" style="width:30%;">
+                                    <img src="${n.imageUrl}" onerror="handleImgError(this)" style="height:100%; object-fit:cover;">
+                                </div>` : ''}
+                                <div class="card-stacked">
+                                    <div class="card-content">
+                                        <p><b>${n.title}</b></p>
+                                        <p class="grey-text" style="font-size:0.85rem">${n.snippet}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>`;
-                    container.appendChild(newsItem);
                 });
-            });
+            }).catch(err => console.error("News Error:", err));
         }
 
+        // Initialize all
         document.addEventListener('DOMContentLoaded', () => {
-            renderLinks();
-            loadFeatureBoxes();
+            loadLinks();
+            loadFeatures();
             loadNews();
         });
     </script>
