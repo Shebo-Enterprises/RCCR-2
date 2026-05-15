@@ -23,26 +23,34 @@
         .btn-rccr { background-color: var(--primary-color); }
         .btn-rccr:hover { background-color: #283593; }
 
-        /* Rich Text Editor Styling */
+        /* Editor Styling */
         #editor-toolbar { background: #eeeeee; padding: 10px; border: 1px solid #ddd; border-bottom: none; border-radius: 4px 4px 0 0; }
         #page-editor { 
-            min-height: 300px; 
+            min-height: 350px; 
             padding: 15px; 
             border: 1px solid #ddd; 
             background: white; 
             border-radius: 0 0 4px 4px;
             overflow-y: auto;
         }
-        #page-editor table { border-collapse: collapse; width: 100%; }
-        #page-editor table, #page-editor td { border: 1px solid #ccc !important; padding: 5px; }
-
-        /* Login Layout */
-        #login-section { max-width: 450px; margin: 100px auto; }
+        #raw-code-editor {
+            display: none;
+            font-family: 'Courier New', Courier, monospace;
+            background: #263238;
+            color: #80cbc4;
+            padding: 15px;
+            min-height: 350px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
         
+        #login-section { max-width: 450px; margin: 100px auto; }
         .stat-box { padding: 20px; border-radius: 8px; color: white; margin-bottom: 20px; }
         .bg-blue { background-color: #1565c0; }
         .bg-green { background-color: #2e7d32; }
-
         .news-item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin-right: 15px; }
         .collection-item { display: flex; align-items: center; justify-content: space-between; }
     </style>
@@ -146,7 +154,7 @@
                     <div class="row" style="margin-bottom:0">
                         <div class="input-field col s12 m6">
                             <input type="text" id="fb-link-text">
-                            <label for="fb-link-text">Button Text (e.g., Learn More)</label>
+                            <label for="fb-link-text">Button Text</label>
                         </div>
                         <div class="input-field col s12 m6">
                             <input type="url" id="fb-link-url">
@@ -160,7 +168,7 @@
                         </div>
                         <div class="input-field col s12 m6">
                             <input type="text" id="fb-background-color" placeholder="#ffffff" required>
-                            <label for="fb-background-color">Background HEX Color</label>
+                            <label for="fb-background-color">HEX Color</label>
                         </div>
                     </div>
                     <button type="submit" id="submit-fb-button" class="btn btn-rccr">Save Card</button>
@@ -182,17 +190,20 @@
                         </div>
                         <div class="input-field col s12 m6">
                             <input type="text" id="page-slug" required pattern="[a-z0-9\-]+">
-                            <label for="page-slug">URL Slug (e.g. about-us)</label>
+                            <label for="page-slug">URL Slug</label>
                         </div>
                     </div>
 
                     <div id="editor-toolbar">
-                        <button type="button" class="btn-small white black-text" onclick="editorCmd('bold')"><i class="material-icons">format_bold</i></button>
-                        <button type="button" class="btn-small white black-text" onclick="editorCmd('italic')"><i class="material-icons">format_italic</i></button>
-                        <button type="button" class="btn-small white black-text" onclick="editorCmd('insertUnorderedList')"><i class="material-icons">format_list_bulleted</i></button>
-                        <button type="button" class="btn-small white black-text" onclick="insertTablePrompt()"><i class="material-icons">grid_on</i></button>
+                        <button type="button" class="btn-small white black-text" onclick="editorCmd('bold')" title="Bold"><i class="material-icons">format_bold</i></button>
+                        <button type="button" class="btn-small white black-text" onclick="editorCmd('italic')" title="Italic"><i class="material-icons">format_italic</i></button>
+                        <button type="button" class="btn-small white black-text" onclick="insertCodePrompt()" title="Insert HTML Block"><i class="material-icons">code</i></button>
+                        <button type="button" class="btn-small amber black-text right" onclick="toggleCodeView()" id="source-toggle">View Source</button>
                     </div>
+                    
                     <div id="page-editor" contenteditable="true"></div>
+                    <textarea id="raw-code-editor"></textarea>
+                    
                     <br>
                     <button type="submit" id="submit-page-button" class="btn btn-rccr">Publish Page</button>
                 </form>
@@ -205,32 +216,32 @@
             <div class="row">
                 <div class="col s12 m6">
                     <div class="stat-box bg-blue">
-                        <span class="white-text">Active Forms</span>
+                        <span>Active Forms</span>
                         <h2 id="total-forms-count" style="margin:0">0</h2>
                     </div>
                 </div>
                 <div class="col s12 m6">
                     <div class="stat-box bg-green">
-                        <span class="white-text">Responses Collected</span>
+                        <span>Total Submissions</span>
                         <h2 id="total-responses-count" style="margin:0">0</h2>
                     </div>
                 </div>
             </div>
             <div class="card admin-card">
-                <button onclick="openFormModal()" class="btn btn-rccr waves-effect"><i class="material-icons left">add</i>Create New Form</button>
+                <button onclick="openFormModal()" class="btn btn-rccr"><i class="material-icons left">add</i>Create Form</button>
                 <ul class="collection" id="existing-forms-list" style="margin-top:20px"></ul>
             </div>
         </div>
-        
+
         <div id="links" class="col s12">
             <div class="card admin-card">
-                <h5><i class="material-icons left">link</i> Navigation Links</h5>
+                <h5><i class="material-icons left">link</i> Sidebar Links</h5>
                 <form id="add-link-form" onsubmit="submitLink(event)">
                     <input type="hidden" id="editing-link-id">
                     <div class="row">
                         <div class="input-field col s12 m4">
                             <input type="text" id="link-text" required>
-                            <label for="link-text">Display Text</label>
+                            <label for="link-text">Text</label>
                         </div>
                         <div class="input-field col s12 m4">
                             <input type="text" id="link-url" required>
@@ -241,10 +252,7 @@
                             <label for="link-order">Order</label>
                         </div>
                         <div class="col s12 m2" style="padding-top:25px">
-                            <label>
-                                <input type="checkbox" id="link-target-blank" />
-                                <span>New Tab</span>
-                            </label>
+                            <label><input type="checkbox" id="link-target-blank" /><span>New Tab</span></label>
                         </div>
                     </div>
                     <button type="submit" id="submit-link-button" class="btn btn-rccr">Add Link</button>
@@ -252,35 +260,27 @@
                 <ul class="collection" id="existing-links-list" style="margin-top:30px"></ul>
             </div>
         </div>
-
     </div>
 </main>
 
 <div id="form-builder-modal" class="modal modal-fixed-footer">
     <div class="modal-content">
-        <h4 id="form-builder-modal-title">Form Builder</h4>
-        <div class="input-field">
-            <input type="text" id="f-title" required>
-            <label for="f-title">Form Title</label>
-        </div>
-        <div class="input-field">
-            <textarea id="f-description" class="materialize-textarea"></textarea>
-            <label for="f-description">Description</label>
-        </div>
+        <h4>Form Builder</h4>
+        <div class="input-field"><input type="text" id="f-title" required><label for="f-title">Title</label></div>
+        <div class="input-field"><textarea id="f-description" class="materialize-textarea"></textarea><label for="f-description">Description</label></div>
         <h6>Fields</h6>
         <div id="builder-fields-container"></div>
-        <button type="button" class="btn-small grey" onclick="addFieldToBuilder()"><i class="material-icons left">add</i>Add Field</button>
+        <button type="button" class="btn-small grey" onclick="addFieldToBuilder()">+ Add Field</button>
     </div>
     <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect btn-flat">Cancel</a>
-        <a href="#!" onclick="submitFormBuilder(event)" class="waves-effect btn-rccr btn">Save Form</a>
+        <a href="#!" class="modal-close btn-flat">Cancel</a>
+        <a href="#!" onclick="submitFormBuilder(event)" class="btn btn-rccr">Save Form</a>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
 <script>
-    // Firebase Init (using your provided config)
     const firebaseConfig = {
         apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
         authDomain: "rccr-main.firebaseapp.com",
@@ -289,26 +289,21 @@
         messagingSenderId: "221328154434",
         appId: "1:221328154434:web:a6000a45f5d4ba964532db"
     };
+
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Materialize Init
-    document.addEventListener('DOMContentLoaded', function() {
-        M.AutoInit();
-    });
+    let isCodeView = false;
 
-    // Auth state
+    document.addEventListener('DOMContentLoaded', () => M.AutoInit());
+
     auth.onAuthStateChanged(user => {
         if (user) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-header').style.display = 'block';
             document.getElementById('management-sections').style.display = 'block';
-            loadNewsItems();
-            loadFeatureBoxes();
-            loadLinks();
-            loadPages();
-            loadForms();
+            loadNewsItems(); loadFeatureBoxes(); loadLinks(); loadPages(); loadForms();
         } else {
             document.getElementById('login-section').style.display = 'block';
             document.getElementById('admin-header').style.display = 'none';
@@ -316,35 +311,102 @@
         }
     });
 
-    // Login/Logout
-    function handleLogin(event) {
-        event.preventDefault();
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        auth.signInWithEmailAndPassword(email, pass).catch(err => {
-            document.getElementById('login-error').textContent = err.message;
+    function handleLogin(e) {
+        e.preventDefault();
+        auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value)
+            .catch(err => document.getElementById('login-error').textContent = err.message);
+    }
+    function handleLogout() { auth.signOut(); }
+
+    /* PAGE MANAGER LOGIC */
+    function toggleCodeView() {
+        const visual = document.getElementById('page-editor');
+        const code = document.getElementById('raw-code-editor');
+        const btn = document.getElementById('source-toggle');
+        if (!isCodeView) {
+            code.value = visual.innerHTML;
+            visual.style.display = 'none'; code.style.display = 'block';
+            btn.textContent = 'View Visual'; btn.classList.replace('amber', 'blue');
+            isCodeView = true;
+        } else {
+            visual.innerHTML = code.value;
+            code.style.display = 'none'; visual.style.display = 'block';
+            btn.textContent = 'View Source'; btn.classList.replace('blue', 'amber');
+            isCodeView = false;
+        }
+    }
+
+    function insertCodePrompt() {
+        const customHTML = prompt("Paste HTML/Code:");
+        if (customHTML) document.execCommand('insertHTML', false, customHTML);
+    }
+
+    function editorCmd(cmd) { document.execCommand(cmd, false, null); }
+
+    function submitPage(e) {
+        e.preventDefault();
+        const id = document.getElementById('editing-page-id').value;
+        const visual = document.getElementById('page-editor');
+        const code = document.getElementById('raw-code-editor');
+        const content = isCodeView ? code.value : visual.innerHTML;
+
+        const data = {
+            title: document.getElementById('page-title').value,
+            slug: document.getElementById('page-slug').value,
+            contentHtml: content,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const p = id ? db.collection("pages").doc(id).update(data) : db.collection("pages").add(data);
+        p.then(() => {
+            M.toast({html: 'Page Published!'});
+            document.getElementById('add-page-form').reset();
+            visual.innerHTML = ''; code.value = '';
+            if (isCodeView) toggleCodeView();
+            loadPages();
         });
     }
 
-    function handleLogout() { auth.signOut(); }
-
-    // Logic: News
-    function submitNewsItem(event) {
-        event.preventDefault();
-        const title = document.getElementById('news-title').value;
-        const snippet = document.getElementById('news-snippet').value;
-        const imageUrl = document.getElementById('news-image-url').value;
-        const id = document.getElementById('editing-news-id').value;
-
-        const data = { title, snippet, imageUrl, timestamp: firebase.firestore.FieldValue.serverTimestamp() };
-        const action = id ? db.collection("news").doc(id).update(data) : db.collection("news").add(data);
-
-        action.then(() => {
-            M.toast({html: 'News Saved!'});
-            document.getElementById('add-news-form').reset();
-            document.getElementById('editing-news-id').value = '';
-            loadNewsItems();
+    function loadPages() {
+        db.collection('pages').orderBy('updatedAt','desc').get().then(qs => {
+            const list = document.getElementById('existing-pages-list');
+            list.innerHTML = '';
+            qs.forEach(doc => {
+                const p = doc.data();
+                list.innerHTML += `<li class="collection-item"><span><b>${p.title}</b> (/${p.slug})</span>
+                    <div>
+                        <button class="btn-small orange" onclick="populatePageEdit('${doc.id}')"><i class="material-icons">edit</i></button>
+                        <button class="btn-small red" onclick="deletePage('${doc.id}')"><i class="material-icons">delete</i></button>
+                    </div></li>`;
+            });
         });
+    }
+
+    function populatePageEdit(id) {
+        db.collection("pages").doc(id).get().then(doc => {
+            const p = doc.data();
+            document.getElementById('page-title').value = p.title;
+            document.getElementById('page-slug').value = p.slug;
+            document.getElementById('page-editor').innerHTML = p.contentHtml;
+            document.getElementById('editing-page-id').value = doc.id;
+            M.updateTextFields();
+        });
+    }
+    
+    function deletePage(id) { if(confirm('Delete?')) db.collection("pages").doc(id).delete().then(loadPages); }
+
+    /* NEWS LOGIC */
+    function submitNewsItem(e) {
+        e.preventDefault();
+        const id = document.getElementById('editing-news-id').value;
+        const data = {
+            title: document.getElementById('news-title').value,
+            snippet: document.getElementById('news-snippet').value,
+            imageUrl: document.getElementById('news-image-url').value,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        const p = id ? db.collection("news").doc(id).update(data) : db.collection("news").add(data);
+        p.then(() => { M.toast({html: 'News Saved'}); document.getElementById('add-news-form').reset(); loadNewsItems(); });
     }
 
     function loadNewsItems() {
@@ -353,17 +415,10 @@
             list.innerHTML = '';
             qs.forEach(doc => {
                 const n = doc.data();
-                list.innerHTML += `
-                    <li class="collection-item">
-                        <div style="display:flex; align-items:center;">
-                            <img src="${n.imageUrl || 'images/news_placeholder_1.jpg'}" class="news-item-img">
-                            <span><b>${n.title}</b></span>
-                        </div>
-                        <div>
-                            <button class="btn-small orange" onclick="populateNewsForEdit('${doc.id}')"><i class="material-icons">edit</i></button>
-                            <button class="btn-small red" onclick="deleteNewsItem('${doc.id}')"><i class="material-icons">delete</i></button>
-                        </div>
-                    </li>`;
+                list.innerHTML += `<li class="collection-item">
+                    <div style="display:flex; align-items:center;"><img src="${n.imageUrl || 'images/news_placeholder_1.jpg'}" class="news-item-img"><span>${n.title}</span></div>
+                    <div><button class="btn-small orange" onclick="populateNewsForEdit('${doc.id}')"><i class="material-icons">edit</i></button>
+                    <button class="btn-small red" onclick="deleteNewsItem('${doc.id}')"><i class="material-icons">delete</i></button></div></li>`;
             });
         });
     }
@@ -376,17 +431,13 @@
             document.getElementById('news-image-url').value = n.imageUrl;
             document.getElementById('editing-news-id').value = doc.id;
             M.updateTextFields();
-            window.scrollTo(0,0);
         });
     }
+    function deleteNewsItem(id) { if(confirm('Delete?')) db.collection("news").doc(id).delete().then(loadNewsItems); }
 
-    function deleteNewsItem(id) {
-        if(confirm('Delete?')) db.collection("news").doc(id).delete().then(loadNewsItems);
-    }
-
-    // Logic: Features
-    function submitFeatureBox(event) {
-        event.preventDefault();
+    /* FEATURE LOGIC */
+    function submitFeatureBox(e) {
+        e.preventDefault();
         const id = document.getElementById('editing-fb-id').value;
         const data = {
             title: document.getElementById('fb-title').value,
@@ -398,13 +449,8 @@
             order: parseInt(document.getElementById('fb-order').value),
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
-
-        const action = id ? db.collection("featureBoxes").doc(id).update(data) : db.collection("featureBoxes").add(data);
-        action.then(() => {
-            M.toast({html: 'Feature Card Saved!'});
-            document.getElementById('add-feature-box-form').reset();
-            loadFeatureBoxes();
-        });
+        const p = id ? db.collection("featureBoxes").doc(id).update(data) : db.collection("featureBoxes").add(data);
+        p.then(() => { M.toast({html: 'Feature Saved'}); document.getElementById('add-feature-box-form').reset(); loadFeatureBoxes(); });
     }
 
     function loadFeatureBoxes() {
@@ -413,16 +459,10 @@
             list.innerHTML = '';
             qs.forEach(doc => {
                 const fb = doc.data();
-                list.innerHTML += `
-                    <div class="card-panel" style="display:flex; justify-content:space-between; align-items:center; background:${fb.backgroundColor}">
-                        <span class="${parseInt(fb.backgroundColor.replace('#',''),16) > 0xffffff/2 ? 'black-text' : 'white-text'}">
-                            <b>${fb.order}. ${fb.title}</b>
-                        </span>
-                        <div>
-                            <button class="btn-small white black-text" onclick="populateFbForEdit('${doc.id}')">Edit</button>
-                            <button class="btn-small red" onclick="deleteFeatureBox('${doc.id}')">X</button>
-                        </div>
-                    </div>`;
+                list.innerHTML += `<div class="card-panel" style="background:${fb.backgroundColor}; display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:#000">${fb.order}. ${fb.title}</b>
+                    <div><button class="btn-small white black-text" onclick="populateFbForEdit('${doc.id}')">Edit</button>
+                    <button class="btn-small red" onclick="deleteFeatureBox('${doc.id}')">X</button></div></div>`;
             });
         });
     }
@@ -441,173 +481,17 @@
             M.updateTextFields();
         });
     }
+    function deleteFeatureBox(id) { if(confirm('Delete?')) db.collection("featureBoxes").doc(id).delete().then(loadFeatureBoxes); }
 
-    function deleteFeatureBox(id) {
-        if(confirm('Delete?')) db.collection("featureBoxes").doc(id).delete().then(loadFeatureBoxes);
-    }
-
-    // Rich Text Editor logic
-    function editorCmd(cmd) { document.execCommand(cmd, false, null); }
-    function insertTablePrompt() {
-        const rows = prompt("Rows", "2");
-        const cols = prompt("Cols", "2");
-        let html = '<table border="1">';
-        for(let r=0; r<rows; r++){
-            html += '<tr>';
-            for(let c=0; c<cols; c++) html += '<td>&nbsp;</td>';
-            html += '</tr>';
-        }
-        html += '</table>';
-        document.execCommand('insertHTML', false, html);
-    }
-
-    // Page Logic
-    function submitPage(event) {
-        event.preventDefault();
-        const id = document.getElementById('editing-page-id').value;
-        const data = {
-            title: document.getElementById('page-title').value,
-            slug: document.getElementById('page-slug').value,
-            contentHtml: document.getElementById('page-editor').innerHTML,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        const action = id ? db.collection("pages").doc(id).update(data) : db.collection("pages").add(data);
-        action.then(() => {
-            M.toast({html: 'Page Published!'});
-            document.getElementById('add-page-form').reset();
-            document.getElementById('page-editor').innerHTML = '';
-            loadPages();
-        });
-    }
-
-    function loadPages() {
-        db.collection('pages').orderBy('updatedAt','desc').get().then(qs => {
-            const list = document.getElementById('existing-pages-list');
-            list.innerHTML = '';
-            qs.forEach(doc => {
-                const p = doc.data();
-                list.innerHTML += `
-                    <li class="collection-item">
-                        <span><b>${p.title}</b> (/${p.slug})</span>
-                        <div>
-                            <button class="btn-small orange" onclick="populatePageEdit('${doc.id}')">Edit</button>
-                            <button class="btn-small red" onclick="deletePage('${doc.id}')">Delete</button>
-                        </div>
-                    </li>`;
-            });
-        });
-    }
-
-    function populatePageEdit(id) {
-        db.collection("pages").doc(id).get().then(doc => {
-            const p = doc.data();
-            document.getElementById('page-title').value = p.title;
-            document.getElementById('page-slug').value = p.slug;
-            document.getElementById('page-editor').innerHTML = p.contentHtml;
-            document.getElementById('editing-page-id').value = doc.id;
-            M.updateTextFields();
-        });
-    }
-
-    function deletePage(id) {
-        if(confirm('Delete?')) db.collection("pages").doc(id).delete().then(loadPages);
-    }
-
-    // Forms Builder Logic
-    let currentFields = [];
-    function openFormModal() {
-        currentFields = [];
-        document.getElementById('builder-fields-container').innerHTML = '';
-        M.Modal.getInstance(document.getElementById('form-builder-modal')).open();
-    }
-
-    function addFieldToBuilder() {
-        const id = Date.now();
-        const div = document.createElement('div');
-        div.className = 'card-panel grey lighten-4';
-        div.id = `field-${id}`;
-        div.innerHTML = `
-            <div class="row" style="margin-bottom:0">
-                <div class="input-field col s5">
-                    <input type="text" class="field-label" placeholder="Label">
-                </div>
-                <div class="input-field col s5">
-                    <select class="browser-default field-type">
-                        <option value="text">Short Text</option>
-                        <option value="textarea">Paragraph</option>
-                        <option value="email">Email</option>
-                    </select>
-                </div>
-                <div class="col s2">
-                    <button class="btn-floating red btn-small" onclick="document.getElementById('field-${id}').remove()"><i class="material-icons">delete</i></button>
-                </div>
-            </div>
-        `;
-        document.getElementById('builder-fields-container').appendChild(div);
-    }
-
-    function submitFormBuilder(e) {
-        const fieldNodes = document.querySelectorAll('#builder-fields-container > div');
-        const fields = Array.from(fieldNodes).map(div => ({
-            label: div.querySelector('.field-label').value,
-            type: div.querySelector('.field-type').value,
-            required: true
-        }));
-
-        const data = {
-            title: document.getElementById('f-title').value,
-            description: document.getElementById('f-description').value,
-            fields: fields,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            responseCount: 0
-        };
-
-        db.collection("forms").add(data).then(() => {
-            M.Modal.getInstance(document.getElementById('form-builder-modal')).close();
-            loadForms();
-        });
-    }
-
-    function loadForms() {
-        db.collection("forms").onSnapshot(qs => {
-            const list = document.getElementById('existing-forms-list');
-            list.innerHTML = '';
-            let totalResp = 0;
-            document.getElementById('total-forms-count').textContent = qs.size;
-            qs.forEach(doc => {
-                const f = doc.data();
-                totalResp += (f.responseCount || 0);
-                list.innerHTML += `
-                    <li class="collection-item">
-                        <span><b>${f.title}</b> (${f.responseCount} responses)</span>
-                        <div>
-                             <button class="btn-small blue-grey" onclick="window.open('view-form.html?id=${doc.id}')">View</button>
-                             <button class="btn-small red" onclick="deleteForm('${doc.id}')">X</button>
-                        </div>
-                    </li>`;
-            });
-            document.getElementById('total-responses-count').textContent = totalResp;
-        });
-    }
-
-    function deleteForm(id) {
-        if(confirm('Delete form?')) db.collection("forms").doc(id).delete();
-    }
-
-    // Sidebar Links
+    /* LINKS LOGIC */
     function loadLinks() {
         db.collection('links').orderBy('order').get().then(qs => {
             const list = document.getElementById('existing-links-list');
             list.innerHTML = '';
             qs.forEach(doc => {
                 const l = doc.data();
-                list.innerHTML += `
-                    <li class="collection-item">
-                        <span>${l.order}. <b>${l.text}</b> (${l.url})</span>
-                        <div>
-                            <button class="btn-small red" onclick="deleteLink('${doc.id}')"><i class="material-icons">delete</i></button>
-                        </div>
-                    </li>`;
+                list.innerHTML += `<li class="collection-item"><span>${l.order}. <b>${l.text}</b> (${l.url})</span>
+                    <button class="btn-small red" onclick="deleteLink('${doc.id}')"><i class="material-icons">delete</i></button></li>`;
             });
         });
     }
@@ -620,16 +504,65 @@
             order: parseInt(document.getElementById('link-order').value),
             targetBlank: document.getElementById('link-target-blank').checked
         };
-        db.collection('links').add(data).then(() => {
-            document.getElementById('add-link-form').reset();
-            loadLinks();
+        db.collection('links').add(data).then(() => { document.getElementById('add-link-form').reset(); loadLinks(); });
+    }
+    function deleteLink(id) { if(confirm('Delete?')) db.collection('links').doc(id).delete().then(loadLinks); }
+
+    /* FORMS LOGIC */
+    function openFormModal() {
+        document.getElementById('builder-fields-container').innerHTML = '';
+        M.Modal.getInstance(document.getElementById('form-builder-modal')).open();
+    }
+
+    function addFieldToBuilder() {
+        const id = Date.now();
+        const div = document.createElement('div');
+        div.className = 'card-panel grey lighten-4';
+        div.id = `field-${id}`;
+        div.innerHTML = `<div class="row" style="margin-bottom:0">
+            <div class="input-field col s5"><input type="text" class="field-label" placeholder="Label"></div>
+            <div class="input-field col s5"><select class="browser-default field-type">
+                <option value="text">Text</option><option value="textarea">Paragraph</option><option value="email">Email</option>
+            </select></div>
+            <div class="col s2"><button type="button" class="btn-floating red btn-small" onclick="document.getElementById('field-${id}').remove()"><i class="material-icons">delete</i></button></div></div>`;
+        document.getElementById('builder-fields-container').appendChild(div);
+    }
+
+    function submitFormBuilder() {
+        const fieldNodes = document.querySelectorAll('#builder-fields-container > div');
+        const fields = Array.from(fieldNodes).map(div => ({
+            label: div.querySelector('.field-label').value,
+            type: div.querySelector('.field-type').value,
+            required: true
+        }));
+        const data = {
+            title: document.getElementById('f-title').value,
+            description: document.getElementById('f-description').value,
+            fields: fields,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            responseCount: 0
+        };
+        db.collection("forms").add(data).then(() => { M.Modal.getInstance(document.getElementById('form-builder-modal')).close(); loadForms(); });
+    }
+
+    function loadForms() {
+        db.collection("forms").onSnapshot(qs => {
+            const list = document.getElementById('existing-forms-list');
+            list.innerHTML = '';
+            let totalResp = 0;
+            document.getElementById('total-forms-count').textContent = qs.size;
+            qs.forEach(doc => {
+                const f = doc.data();
+                totalResp += (f.responseCount || 0);
+                list.innerHTML += `<li class="collection-item"><span><b>${f.title}</b> (${f.responseCount} responses)</span>
+                    <div><button class="btn-small blue-grey" onclick="window.open('view-form.html?id=${doc.id}')">View</button>
+                    <button class="btn-small red" onclick="deleteForm('${doc.id}')">X</button></div></li>`;
+            });
+            document.getElementById('total-responses-count').textContent = totalResp;
         });
     }
+    function deleteForm(id) { if(confirm('Delete Form?')) db.collection("forms").doc(id).delete(); }
 
-    function deleteLink(id) {
-        if(confirm('Delete link?')) db.collection('links').doc(id).delete().then(loadLinks);
-    }
 </script>
-
 </body>
 </html>
