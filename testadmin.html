@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCCR Admin Portal</title>
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Unlayer Editor Script -->
+    <script src="https://editor.unlayer.com/embed.js"></script>
+    
+    <style>
+        :root { --primary-color: #1a237e; }
+        body { background-color: #f5f7fa; display: flex; min-height: 100vh; flex-direction: column; }
+        main { flex: 1 0 auto; }
+        
+        .nav-wrapper { background-color: var(--primary-color); }
+        .tabs .tab a { color: var(--primary-color); }
+        .tabs .tab a:hover, .tabs .tab a.active { background-color: rgba(26, 35, 126, 0.05); color: var(--primary-color); }
+        .tabs .indicator { background-color: var(--primary-color); }
+        
+        .admin-card { border-radius: 8px; margin-top: 20px; padding: 20px; }
+        .btn-rccr { background-color: var(--primary-color); }
+        .btn-rccr:hover { background-color: #283593; }
+
+        #unlayer-editor { min-height: 600px; border: 1px solid #ddd; margin-top: 10px; border-radius: 4px; }
+        
+        #login-section { max-width: 450px; margin: 100px auto; }
+        .stat-box { padding: 20px; border-radius: 8px; color: white; margin-bottom: 20px; }
+        .bg-blue { background-color: #1565c0; }
+        .bg-green { background-color: #2e7d32; }
+        .news-item-img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; margin-right: 15px; }
+        .collection-item { display: flex; align-items: center; justify-content: space-between; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+</head>
+<body>
+
+<header id="admin-header" style="display:none;">
+    <nav class="nav-wrapper">
+        <div class="container">
+            <a href="#" class="brand-logo left hide-on-small-only">RCCR Admin</a>
+            <ul class="right">
+                <li><a href="index.html" target="_blank"><i class="material-icons left">language</i>View Site</a></li>
+                <li><a href="#" onclick="handleLogout()"><i class="material-icons">exit_to_app</i></a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-content white">
+        <div class="container">
+            <ul class="tabs tabs-fixed-width">
+                <li class="tab"><a href="#news" class="active">News</a></li>
+                <li class="tab"><a href="#features">Features</a></li>
+                <li class="tab"><a href="#links">Sidebar</a></li>
+                <li class="tab"><a href="#pages">Pages</a></li>
+                <li class="tab"><a href="#forms">Forms</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <div id="login-section" class="card admin-card">
+        <div class="center-align">
+            <img src="Rabbinical Council (1) (1).png" alt="Logo" style="width: 120px;">
+            <h4>Staff Login</h4>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <div class="input-field"><i class="material-icons prefix">email</i><input type="email" id="email" required><label for="email">Email</label></div>
+            <div class="input-field"><i class="material-icons prefix">lock</i><input type="password" id="password" required><label for="password">Password</label></div>
+            <button type="submit" class="btn btn-large btn-rccr" style="width:100%">Login</button>
+            <p id="login-error" class="red-text center-align"></p>
+        </form>
+    </div>
+
+    <div id="management-sections" style="display:none;">
+        <div id="news" class="col s12">
+            <div class="card admin-card">
+                <h5><i class="material-icons left">newspaper</i> Manage News</h5>
+                <form id="add-news-form" onsubmit="submitNewsItem(event)">
+                    <input type="hidden" id="editing-news-id">
+                    <div class="input-field"><input type="text" id="news-title" required><label for="news-title">Headline</label></div>
+                    <div class="input-field"><textarea id="news-snippet" class="materialize-textarea" required></textarea><label for="news-snippet">News Content/Snippet</label></div>
+                    <div class="input-field"><input type="text" id="news-image-url"><label for="news-image-url">Image URL (Optional)</label></div>
+                    <button type="submit" id="submit-news-button" class="btn btn-rccr">Add Post</button>
+                </form>
+                <div class="divider" style="margin: 30px 0;"></div>
+                <ul class="collection" id="existing-news-list"></ul>
+            </div>
+        </div>
+
+        <div id="features" class="col s12">
+            <div class="card admin-card">
+                <h5><i class="material-icons left">view_quilt</i> Feature Boxes</h5>
+                <form id="add-feature-box-form" onsubmit="submitFeatureBox(event)">
+                    <input type="hidden" id="editing-fb-id">
+                    <div class="row"><div class="input-field col s12 m6"><input type="text" id="fb-title" required><label for="fb-title">Card Title</label></div>
+                    <div class="input-field col s12 m6"><input type="number" id="fb-order" value="1" min="1" required><label for="fb-order">Display Order</label></div></div>
+                    <div class="input-field"><textarea id="fb-text" class="materialize-textarea" required></textarea><label for="fb-text">Description (supports &lt;br&gt;)</label></div>
+                    <div class="row"><div class="input-field col s12 m6"><input type="text" id="fb-link-text"><label for="fb-link-text">Button Text</label></div>
+                    <div class="input-field col s12 m6"><input type="url" id="fb-link-url"><label for="fb-link-url">Button URL</label></div></div>
+                    <div class="row"><div class="input-field col s12 m6"><input type="text" id="fb-image-url"><label for="fb-image-url">Image URL</label></div>
+                    <div class="input-field col s12 m6"><input type="text" id="fb-background-color" placeholder="#ffffff" required><label for="fb-background-color">HEX Color</label></div></div>
+                    <button type="submit" id="submit-fb-button" class="btn btn-rccr">Save Card</button>
+                </form>
+                <div class="divider" style="margin: 30px 0;"></div>
+                <div id="existing-feature-box-list"></div>
+            </div>
+        </div>
+
+        <div id="pages" class="col s12">
+            <div class="card admin-card">
+                <h5><i class="material-icons left">description</i> Page Manager</h5>
+                <form id="add-page-form" onsubmit="submitPage(event)">
+                    <input type="hidden" id="editing-page-id">
+                    <div class="row">
+                        <div class="input-field col s12 m6"><input type="text" id="page-title" required><label for="page-title">Page Title</label></div>
+                        <div class="input-field col s12 m6"><input type="text" id="page-slug" required pattern="[a-z0-9\-]+"><label for="page-slug">URL Slug</label></div>
+                    </div>
+                    <div id="unlayer-editor"></div>
+                    <br>
+                    <button type="submit" class="btn btn-rccr">Publish Page</button>
+                </form>
+                <div class="divider" style="margin:30px 0;"></div>
+                <ul class="collection" id="existing-pages-list"></ul>
+            </div>
+        </div>
+
+        <div id="forms" class="col s12">
+            <div class="row"><div class="col s12 m6"><div class="stat-box bg-blue"><span>Active Forms</span><h2 id="total-forms-count" style="margin:0">0</h2></div></div>
+            <div class="col s12 m6"><div class="stat-box bg-green"><span>Total Submissions</span><h2 id="total-responses-count" style="margin:0">0</h2></div></div></div>
+            <div class="card admin-card"><button onclick="openFormModal()" class="btn btn-rccr"><i class="material-icons left">add</i>Create Form</button>
+            <ul class="collection" id="existing-forms-list" style="margin-top:20px"></ul></div>
+        </div>
+
+        <div id="links" class="col s12">
+            <div class="card admin-card">
+                <h5><i class="material-icons left">link</i> Sidebar Links</h5>
+                <form id="add-link-form" onsubmit="submitLink(event)">
+                    <div class="row"><div class="input-field col s12 m4"><input type="text" id="link-text" required><label for="link-text">Text</label></div>
+                    <div class="input-field col s12 m4"><input type="text" id="link-url" required><label for="link-url">URL</label></div>
+                    <div class="input-field col s12 m2"><input type="number" id="link-order" required value="1"><label for="link-order">Order</label></div>
+                    <div class="col s12 m2" style="padding-top:25px"><label><input type="checkbox" id="link-target-blank" /><span>New Tab</span></label></div></div>
+                    <button type="submit" id="submit-link-button" class="btn btn-rccr">Add Link</button>
+                </form>
+                <ul class="collection" id="existing-links-list" style="margin-top:30px"></ul>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="form-builder-modal" class="modal modal-fixed-footer">
+    <div class="modal-content"><h4>Form Builder</h4><div id="builder-fields-container"></div><button type="button" class="btn-small grey" onclick="addFieldToBuilder()">+ Add Field</button></div>
+    <div class="modal-footer"><a href="#!" class="modal-close btn-flat">Cancel</a><a href="#!" onclick="submitFormBuilder(event)" class="btn btn-rccr">Save Form</a></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+        authDomain: "rccr-main.firebaseapp.com",
+        projectId: "rccr-main",
+        storageBucket: "rccr-main.firebasestorage.app",
+        messagingSenderId: "221328154434",
+        appId: "1:221328154434:web:a6000a45f5d4ba964532db"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let unlayerEditor;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        M.AutoInit();
+        unlayer.createEditor({ container: 'unlayer-editor' });
+        unlayerEditor = unlayer;
+    });
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-header').style.display = 'block';
+            document.getElementById('management-sections').style.display = 'block';
+            loadNewsItems(); loadFeatureBoxes(); loadLinks(); loadPages(); loadForms();
+        } else {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('admin-header').style.display = 'none';
+            document.getElementById('management-sections').style.display = 'none';
+        }
+    });
+
+    function handleLogin(e) { e.preventDefault(); auth.signInWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value).catch(err => document.getElementById('login-error').textContent = err.message); }
+    function handleLogout() { auth.signOut(); }
+
+    /* UNLAYER PAGE LOGIC */
+    function submitPage(e) {
+        e.preventDefault();
+        const id = document.getElementById('editing-page-id').value;
+        unlayerEditor.exportHtml((data) => {
+            const pageData = {
+                title: document.getElementById('page-title').value,
+                slug: document.getElementById('page-slug').value,
+                contentHtml: data.html,
+                designJson: JSON.stringify(data.design),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            const p = id ? db.collection("pages").doc(id).update(pageData) : db.collection("pages").add(pageData);
+            p.then(() => { M.toast({html: 'Page Published!'}); document.getElementById('add-page-form').reset(); unlayerEditor.loadDesign({}); loadPages(); });
+        });
+    }
+
+    function loadPages() {
+        db.collection('pages').orderBy('updatedAt','desc').get().then(qs => {
+            const list = document.getElementById('existing-pages-list'); list.innerHTML = '';
+            qs.forEach(doc => {
+                const p = doc.data();
+                list.innerHTML += `<li class="collection-item"><span><b>${p.title}</b> (/${p.slug})</span>
+                    <div><button class="btn-small orange" onclick="populatePageEdit('${doc.id}')"><i class="material-icons">edit</i></button>
+                    <button class="btn-small red" onclick="deletePage('${doc.id}')"><i class="material-icons">delete</i></button></div></li>`;
+            });
+        });
+    }
+
+    function populatePageEdit(id) {
+        db.collection("pages").doc(id).get().then(doc => {
+            const p = doc.data();
+            document.getElementById('page-title').value = p.title;
+            document.getElementById('page-slug').value = p.slug;
+            document.getElementById('editing-page-id').value = doc.id;
+            if (p.designJson) unlayerEditor.loadDesign(JSON.parse(p.designJson));
+            M.updateTextFields();
+        });
+    }
+    
+    function deletePage(id) { if(confirm('Delete?')) db.collection("pages").doc(id).delete().then(loadPages); }
+
+    /* NEWS LOGIC */
+    function submitNewsItem(e) { e.preventDefault(); const id = document.getElementById('editing-news-id').value; const data = { title: document.getElementById('news-title').value, snippet: document.getElementById('news-snippet').value, imageUrl: document.getElementById('news-image-url').value, timestamp: firebase.firestore.FieldValue.serverTimestamp() }; const p = id ? db.collection("news").doc(id).update(data) : db.collection("news").add(data); p.then(() => { M.toast({html: 'News Saved'}); document.getElementById('add-news-form').reset(); loadNewsItems(); }); }
+    function loadNewsItems() { db.collection("news").orderBy("timestamp", "desc").get().then(qs => { const list = document.getElementById('existing-news-list'); list.innerHTML = ''; qs.forEach(doc => { const n = doc.data(); list.innerHTML += `<li class="collection-item"><div style="display:flex; align-items:center;"><img src="${n.imageUrl || 'images/news_placeholder_1.jpg'}" class="news-item-img"><span>${n.title}</span></div><div><button class="btn-small orange" onclick="populateNewsForEdit('${doc.id}')"><i class="material-icons">edit</i></button><button class="btn-small red" onclick="deleteNewsItem('${doc.id}')"><i class="material-icons">delete</i></button></div></li>`; }); }); }
+    function populateNewsForEdit(id) { db.collection("news").doc(id).get().then(doc => { const n = doc.data(); document.getElementById('news-title').value = n.title; document.getElementById('news-snippet').value = n.snippet; document.getElementById('news-image-url').value = n.imageUrl; document.getElementById('editing-news-id').value = doc.id; M.updateTextFields(); }); }
+    function deleteNewsItem(id) { if(confirm('Delete?')) db.collection("news").doc(id).delete().then(loadNewsItems); }
+
+    /* FEATURE LOGIC */
+    function submitFeatureBox(e) { e.preventDefault(); const id = document.getElementById('editing-fb-id').value; const data = { title: document.getElementById('fb-title').value, text: document.getElementById('fb-text').value, linkText: document.getElementById('fb-link-text').value, linkUrl: document.getElementById('fb-link-url').value, imageUrl: document.getElementById('fb-image-url').value, backgroundColor: document.getElementById('fb-background-color').value, order: parseInt(document.getElementById('fb-order').value), timestamp: firebase.firestore.FieldValue.serverTimestamp() }; const p = id ? db.collection("featureBoxes").doc(id).update(data) : db.collection("featureBoxes").add(data); p.then(() => { M.toast({html: 'Feature Saved'}); document.getElementById('add-feature-box-form').reset(); loadFeatureBoxes(); }); }
+    function loadFeatureBoxes() { db.collection("featureBoxes").orderBy("order").get().then(qs => { const list = document.getElementById('existing-feature-box-list'); list.innerHTML = ''; qs.forEach(doc => { const fb = doc.data(); list.innerHTML += `<div class="card-panel" style="background:${fb.backgroundColor}; display:flex; justify-content:space-between; align-items:center;"><b style="color:#000">${fb.order}. ${fb.title}</b><div><button class="btn-small white black-text" onclick="populateFbForEdit('${doc.id}')">Edit</button><button class="btn-small red" onclick="deleteFeatureBox('${doc.id}')">X</button></div></div>`; }); }); }
+    function populateFbForEdit(id) { db.collection("featureBoxes").doc(id).get().then(doc => { const fb = doc.data(); document.getElementById('fb-title').value = fb.title; document.getElementById('fb-text').value = fb.text; document.getElementById('fb-link-text').value = fb.linkText; document.getElementById('fb-link-url').value = fb.linkUrl; document.getElementById('fb-image-url').value = fb.imageUrl; document.getElementById('fb-background-color').value = fb.backgroundColor; document.getElementById('fb-order').value = fb.order; document.getElementById('editing-fb-id').value = doc.id; M.updateTextFields(); }); }
+    function deleteFeatureBox(id) { if(confirm('Delete?')) db.collection("featureBoxes").doc(id).delete().then(loadFeatureBoxes); }
+
+    /* LINKS LOGIC */
+    function loadLinks() { db.collection('links').orderBy('order').get().then(qs => { const list = document.getElementById('existing-links-list'); list.innerHTML = ''; qs.forEach(doc => { const l = doc.data(); list.innerHTML += `<li class="collection-item"><span>${l.order}. <b>${l.text}</b> (${l.url})</span><button class="btn-small red" onclick="deleteLink('${doc.id}')"><i class="material-icons">delete</i></button></li>`; }); }); }
+    function submitLink(e) { e.preventDefault(); const data = { text: document.getElementById('link-text').value, url: document.getElementById('link-url').value, order: parseInt(document.getElementById('link-order').value), targetBlank: document.getElementById('link-target-blank').checked }; db.collection('links').add(data).then(() => { document.getElementById('add-link-form').reset(); loadLinks(); }); }
+    function deleteLink(id) { if(confirm('Delete?')) db.collection('links').doc(id).delete().then(loadLinks); }
+
+    /* FORMS LOGIC */
+    function openFormModal() { document.getElementById('builder-fields-container').innerHTML = ''; M.Modal.getInstance(document.getElementById('form-builder-modal')).open(); }
+    function addFieldToBuilder() { const id = Date.now(); const div = document.createElement('div'); div.className = 'card-panel grey lighten-4'; div.id = `field-${id}`; div.innerHTML = `<div class="row" style="margin-bottom:0"><div class="input-field col s5"><input type="text" class="field-label" placeholder="Label"></div><div class="input-field col s5"><select class="browser-default field-type"><option value="text">Text</option><option value="textarea">Paragraph</option><option value="email">Email</option></select></div><div class="col s2"><button type="button" class="btn-floating red btn-small" onclick="document.getElementById('field-${id}').remove()"><i class="material-icons">delete</i></button></div></div>`; document.getElementById('builder-fields-container').appendChild(div); }
+    function submitFormBuilder() { const fieldNodes = document.querySelectorAll('#builder-fields-container > div'); const fields = Array.from(fieldNodes).map(div => ({ label: div.querySelector('.field-label').value, type: div.querySelector('.field-type').value, required: true })); const data = { title: document.getElementById('f-title').value, description: document.getElementById('f-description').value, fields: fields, createdAt: firebase.firestore.FieldValue.serverTimestamp(), responseCount: 0 }; db.collection("forms").add(data).then(() => { M.Modal.getInstance(document.getElementById('form-builder-modal')).close(); loadForms(); }); }
+    function loadForms() { db.collection("forms").onSnapshot(qs => { const list = document.getElementById('existing-forms-list'); list.innerHTML = ''; let totalResp = 0; document.getElementById('total-forms-count').textContent = qs.size; qs.forEach(doc => { const f = doc.data(); totalResp += (f.responseCount || 0); list.innerHTML += `<li class="collection-item"><span><b>${f.title}</b> (${f.responseCount} responses)</span><div><button class="btn-small blue-grey" onclick="window.open('view-form.html?id=${doc.id}')">View</button><button class="btn-small red" onclick="deleteForm('${doc.id}')">X</button></div></li>`; }); document.getElementById('total-responses-count').textContent = totalResp; }); }
+    function deleteForm(id) { if(confirm('Delete Form?')) db.collection("forms").doc(id).delete(); }
+
+</script>
+</body>
+</html>
