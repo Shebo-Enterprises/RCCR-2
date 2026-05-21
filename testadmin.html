@@ -177,11 +177,17 @@
     const db = firebase.firestore();
     let unlayerEditor;
 
-    document.addEventListener('DOMContentLoaded', () => {
-        M.AutoInit();
-        unlayer.createEditor({ container: 'unlayer-editor' });
-        unlayerEditor = unlayer;
+document.addEventListener('DOMContentLoaded', () => {
+    M.AutoInit();
+    
+    // Initialize Unlayer with your Project ID
+    unlayer.createEditor({ 
+        container: 'unlayer-editor',
+        projectId: 287059 // REPLACE THIS with your actual Project ID number
     });
+    
+    unlayerEditor = unlayer;
+});
 
     auth.onAuthStateChanged(user => {
         if (user) {
