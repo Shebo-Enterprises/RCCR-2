@@ -2,117 +2,174 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Viewer - RCCR</title>
-    <!-- Bootstrap 3 CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Form | RCCR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Verdana, Geneva, sans-serif; padding-top: 30px; background-color: #fff; }
-        .form-container { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; border-radius: 4px; }
-        /* Force Verdana on all Bootstrap elements */
-        .form-control, .btn, label, h1, p, .help-block { font-family: Verdana, Geneva, sans-serif !important; }
-        .form-header { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .form-header h1 { font-size: 24px; color: #333; margin-top: 0; }
-        .success-view { text-align: center; padding: 40px 0; }
+        body { font: 400 15px Lato, sans-serif; line-height: 1.8; color: #818181; background: #f6f6f6; }
+        .navbar { background-color: #0f2747; border-bottom: 3px solid #c8a850; font-family: Montserrat, sans-serif; font-size: 12px; letter-spacing: 4px; padding: .75rem 1rem; }
+        .navbar-brand img { height: 36px; margin-right: 8px; }
+        .navbar-nav .nav-link { color: #fff !important; }
+        .form-card { background: white; border-top: 4px solid #c8a850; box-shadow: 0 2px 12px rgba(0,0,0,.08); max-width: 700px; margin: 3rem auto; padding: 2.5rem; }
+        .form-title { color: #0f2747; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-gold { background: #c8a850; color: white; border: none; font-family: Montserrat, sans-serif; letter-spacing: 2px; font-size: 12px; font-weight: 600; }
+        .btn-gold:hover { background: #b2933e; color: white; }
+        .btn-gold:disabled { background: #d4b87a; color: white; }
+        .success-card { text-align: center; padding: 3rem 1.5rem; }
+        .success-icon { font-size: 3.5rem; color: #c8a850; line-height: 1; }
+        .form-label { color: #303030; font-weight: 600; font-size: 14px; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
+
+<nav class="navbar navbar-dark sticky-top">
     <div class="container">
-        <div class="form-container">
-            <div id="loading" class="text-center"><h4>Loading form...</h4></div>
-            
-            <div id="form-content" style="display:none;">
-                <div class="form-header">
-                    <h1 id="form-title"></h1>
-                    <p id="form-desc"></p>
-                </div>
-                <form id="public-form">
-                    <div id="fields-container"></div>
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">Submit Response</button>
-                </form>
-            </div>
-
-            <div id="success-view" style="display:none;" class="success-view">
-                <div class="alert alert-success">
-                    <h3 style="margin-top:0;">✔ Submitted</h3>
-                    <p id="success-text"></p>
-                </div>
-                <a href="../index.html" class="btn btn-default">Return to Home</a>
-            </div>
-        </div>
+        <a class="navbar-brand d-flex align-items-center" href="../index.html">
+            <img src="../Rabbinical Council (1) (1).png" alt="RCCR" onerror="this.style.display='none'">
+            RCCR
+        </a>
     </div>
+</nav>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
-            authDomain: "rccr-main.firebaseapp.com",
-            projectId: "rccr-main",
-            storageBucket: "rccr-main.firebasestorage.app",
-            messagingSenderId: "221328154434",
-            appId: "1:221328154434:web:a6000a45f5d4ba964532db",
-            measurementId: "G-97BBMTGDR0"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const formId = new URLSearchParams(window.location.search).get('id');
+<div class="container px-3">
+    <div class="form-card">
 
-        if (!formId) {
-            document.getElementById('loading').innerText = "Error: Form ID missing.";
-        } else {
-            db.collection("forms").doc(formId).get().then(doc => {
-                if (!doc.exists) {
-                    document.getElementById('loading').innerText = "Error: Form not found.";
+        <!-- Loading -->
+        <div id="loading" class="text-center py-4">
+            <div class="spinner-border mb-3" style="color:#c8a850;"></div>
+            <p class="text-muted">Loading form...</p>
+        </div>
+
+        <!-- Form -->
+        <div id="form-content" style="display:none;">
+            <h3 class="form-title mb-1" id="form-title"></h3>
+            <p class="text-muted small mb-4" id="form-desc"></p>
+            <hr class="mb-4" style="border-color:#c8a850; opacity:.3;">
+            <form id="public-form" novalidate>
+                <div id="fields-container" class="d-flex flex-column gap-3"></div>
+                <div class="mt-4">
+                    <button type="submit" id="submit-btn" class="btn btn-gold w-100 py-2">Submit Response</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success -->
+        <div id="success-view" class="success-card" style="display:none;">
+            <div class="success-icon mb-3">&#10003;</div>
+            <h4 class="fw-bold mb-2" style="color:#0f2747; font-family:Montserrat,sans-serif;">Response Submitted!</h4>
+            <p class="text-muted mb-4" id="success-text"></p>
+            <a href="../index.html" class="btn btn-gold px-5 py-2">Return to Home</a>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+        authDomain: "rccr-main.firebaseapp.com",
+        projectId: "rccr-main",
+        storageBucket: "rccr-main.firebasestorage.app",
+        messagingSenderId: "221328154434",
+        appId: "1:221328154434:web:a6000a45f5d4ba964532db"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const formId = new URLSearchParams(window.location.search).get('id');
+
+    if (!formId) {
+        document.getElementById('loading').innerHTML = '<div class="alert alert-danger">Error: No form ID provided.</div>';
+    } else {
+        db.collection('forms').doc(formId).get().then(doc => {
+            document.getElementById('loading').style.display = 'none';
+
+            if (!doc.exists) {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('loading').innerHTML = '<div class="alert alert-danger">Form not found.</div>';
+                return;
+            }
+
+            const data = doc.data();
+            document.title = data.title + ' | RCCR';
+            document.getElementById('form-title').textContent = data.title;
+            document.getElementById('form-desc').textContent = data.description || '';
+            document.getElementById('form-content').style.display = 'block';
+
+            const container = document.getElementById('fields-container');
+            data.fields.forEach(f => {
+                const wrapper = document.createElement('div');
+
+                if (f.type === 'checkbox') {
+                    wrapper.className = 'form-check';
+                    wrapper.innerHTML = `
+                        <input class="form-check-input" type="checkbox" name="${f.label}" id="field-${f.label}" ${f.required ? 'required' : ''}>
+                        <label class="form-check-label fw-semibold" for="field-${f.label}">${f.label}${f.required ? ' <span class="text-danger">*</span>' : ''}</label>
+                        <div class="invalid-feedback">This field is required.</div>`;
+                } else {
+                    wrapper.className = 'mb-1';
+                    const labelHtml = `<label class="form-label" for="field-${f.label}">${f.label}${f.required ? ' <span class="text-danger">*</span>' : ''}</label>`;
+                    let inputHtml = '';
+
+                    if (f.type === 'textarea') {
+                        inputHtml = `<textarea id="field-${f.label}" name="${f.label}" class="form-control" rows="4" ${f.required ? 'required' : ''}></textarea>`;
+                    } else if (f.type === 'select') {
+                        const opts = (f.options || []).map(o => `<option value="${o}">${o}</option>`).join('');
+                        inputHtml = `<select id="field-${f.label}" name="${f.label}" class="form-select" ${f.required ? 'required' : ''}><option value="">Select...</option>${opts}</select>`;
+                    } else {
+                        inputHtml = `<input type="${f.type || 'text'}" id="field-${f.label}" name="${f.label}" class="form-control" ${f.required ? 'required' : ''}>`;
+                    }
+
+                    wrapper.innerHTML = labelHtml + inputHtml + '<div class="invalid-feedback">This field is required.</div>';
+                }
+
+                container.appendChild(wrapper);
+            });
+
+            const form = document.getElementById('public-form');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
                     return;
                 }
-                const data = doc.data();
-                document.getElementById('form-title').innerText = data.title;
-                document.getElementById('form-desc').innerText = data.description || '';
-                
-                const container = document.getElementById('fields-container');
-                data.fields.forEach(f => {
-                    const group = document.createElement('div');
-                    if (f.type === 'checkbox') {
-                        group.className = 'checkbox';
-                        group.innerHTML = `<label><input type="checkbox" name="${f.label}" ${f.required ? 'required' : ''}> <strong>${f.label}${f.required ? ' *' : ''}</strong></label>`;
-                    } else {
-                        group.className = 'form-group';
-                        let labelHtml = `<label class="control-label">${f.label}${f.required ? ' *' : ''}</label>`;
-                        let inputHtml = '';
-                        
-                        if (f.type === 'textarea') {
-                            inputHtml = `<textarea name="${f.label}" class="form-control" ${f.required ? 'required' : ''} rows="4"></textarea>`;
-                        } else if (f.type === 'select') {
-                            inputHtml = `<select name="${f.label}" class="form-control" ${f.required ? 'required' : ''}><option value="">Select...</option>${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}</select>`;
-                        } else {
-                            inputHtml = `<input type="${f.type}" name="${f.label}" class="form-control" ${f.required ? 'required' : ''}>`;
-                        }
-                        group.innerHTML = labelHtml + inputHtml;
-                    }
-                    
-                    group.innerHTML = inputHtml;
-                    container.appendChild(group);
-                });
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('form-content').style.display = 'block';
-                document.getElementById('public-form').onsubmit = async (e) => {
-                    e.preventDefault();
-                    const btn = e.target.querySelector('button');
-                    btn.disabled = true; btn.innerText = "Sending...";
-                    const formData = new FormData(e.target);
-                    const responses = {};
-                    formData.forEach((val, key) => responses[key] = val);
-                    try {
-                        await db.collection("formSubmissions").add({ formId, responses, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                        await db.collection("forms").doc(formId).update({ responseCount: firebase.firestore.FieldValue.increment(1) });
-                        document.getElementById('form-content').style.display = 'none';
-                        document.getElementById('success-text').innerText = data.successMessage || 'Thank you for your response.';
-                        document.getElementById('success-view').style.display = 'block';
-                    } catch (err) { alert("Error: " + err.message); btn.disabled = false; btn.innerText = "Submit Response"; }
-                };
+
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+
+                const formData = new FormData(form);
+                const responses = {};
+                formData.forEach((val, key) => responses[key] = val);
+
+                try {
+                    await db.collection('formSubmissions').add({
+                        formId,
+                        responses,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    await db.collection('forms').doc(formId).update({
+                        responseCount: firebase.firestore.FieldValue.increment(1)
+                    });
+                    document.getElementById('form-content').style.display = 'none';
+                    document.getElementById('success-text').textContent = data.successMessage || 'Thank you for your response.';
+                    document.getElementById('success-view').style.display = 'block';
+                } catch (err) {
+                    btn.disabled = false;
+                    btn.textContent = 'Submit Response';
+                    alert('Error submitting form: ' + err.message);
+                }
             });
-        }
-    </script>
+        }).catch(err => {
+            document.getElementById('loading').innerHTML = `<div class="alert alert-danger">Error loading form: ${err.message}</div>`;
+        });
+    }
+</script>
 </body>
 </html>

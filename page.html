@@ -2,245 +2,166 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCCR | Rabbinical Council of The Charles River</title>
-    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
-    
-    <!-- Materialize CSS & Google Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RCCR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --rccr-blue: #1a237e; }
-        
-        body { 
-            display: flex; 
-            min-height: 100vh; 
-            flex-direction: column; 
-            background-color: #fafafa; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-        }
-        main { flex: 1 0 auto; }
-
-        /* Navbar - Identical to Home */
-        nav { background-color: var(--rccr-blue); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .brand-logo { display: flex; align-items: center; font-weight: 300; }
-        .brand-logo img { height: 40px; margin-right: 15px; }
-
-        /* Hero / Title Section - Identical to Home */
-        .page-title-area { background: #fff; padding: 40px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 30px; }
-        #page-title { margin: 0; font-weight: 700; color: var(--rccr-blue); }
-        .sub-header { color: #757575; font-size: 1.2rem; margin-top: 10px; }
-        
-        /* Content Panel */
-        #page-content { font-size: 1.1rem; line-height: 1.8; color: #424242; }
-        .main-card { border-radius: 8px; padding: 40px !important; }
-        
-        /* Sidebar Navigation */
-        .collection .collection-item a { color: var(--rccr-blue); font-weight: 600; }
-        .collection-header { background-color: #f5f5f5 !important; }
-
-        /* Status UI */
-        #error-report {
-            display: none;
-            background: #ffcdd2;
-            color: #b71c1c;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
-        /* Footer - Identical to Home */
-        footer.page-footer { background-color: #212121; padding-top: 20px; }
-        .footer-copyright { background-color: #1a1a1a !important; }
+        body { font: 400 15px Lato, sans-serif; line-height: 1.8; color: #818181; }
+        h2 { font-size: 24px; text-transform: uppercase; color: #303030; font-weight: 600; margin-bottom: 30px; }
+        .navbar { background-color: #0f2747; border-bottom: 3px solid #c8a850; font-family: Montserrat, sans-serif; font-size: 12px; letter-spacing: 4px; padding: .75rem 1rem; }
+        .navbar-brand img { height: 36px; margin-right: 8px; }
+        .navbar-nav .nav-link { color: #fff !important; }
+        .navbar-nav .nav-link:hover { color: #c8a850 !important; background-color: #fff !important; }
+        .page-header { background: #0f2747; color: white; padding: 80px 50px 50px; border-bottom: 3px solid #c8a850; font-family: Montserrat, sans-serif; margin-top: 56px; }
+        .page-header h1 { font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
+        .section-fluid { padding: 70px 50px; }
+        @media (max-width: 767px) { .section-fluid { padding: 50px 20px; } .page-header { padding: 70px 20px 40px; } }
+        .bg-grey { background-color: #f6f6f6; }
+        .content-panel { background: white; border-top: 4px solid #c8a850; box-shadow: 0 2px 10px rgba(0,0,0,.08); padding: 40px; font-size: 16px; line-height: 1.9; color: #444; }
+        .sidebar-dark { background: #0f2747; color: white; padding: 25px; margin-bottom: 20px; }
+        .sidebar-dark h5 { color: #c8a850; font-family: Montserrat, sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; }
+        .sidebar-link { color: rgba(255,255,255,.7); text-decoration: none; display: block; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.1); font-size: 14px; }
+        .sidebar-link:hover { color: #c8a850; }
+        .btn-gold { background: #c8a850; color: white; border: none; font-family: Montserrat, sans-serif; letter-spacing: 2px; font-size: 12px; }
+        .btn-gold:hover { background: #b2933e; color: white; }
+        .footer { background-color: #0f2747; color: white; padding: 40px 50px 20px; border-top: 3px solid #c8a850; }
+        .footer h5 { font-family: Montserrat, sans-serif; text-transform: uppercase; letter-spacing: 3px; color: #c8a850; font-size: 13px; margin-bottom: 15px; }
+        .footer a { color: rgba(255,255,255,.65); text-decoration: none; }
+        .footer a:hover { color: #c8a850; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,.12); padding-top: 15px; margin-top: 25px; }
+        #error-report { display: none; }
     </style>
-
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
 <body>
 
-    <!-- Top Bar -->
-    <div class="navbar-fixed">
-        <nav>
-            <div class="nav-wrapper container">
-                <a href="index.html" class="brand-logo">
-                    <img src="Rabbinical Council (1) (1).png" alt="RCCR" onerror="this.style.display='none'">
-                    <span class="hide-on-small-only"></span>
-                </a>
-                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-                <ul class="right hide-on-med-and-down" id="nav-links"></ul>
-            </div>
-        </nav>
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="Rabbinical Council (1) (1).png" alt="RCCR" onerror="this.style.display='none'">
+            RCCR
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto" id="nav-links"></ul>
+        </div>
     </div>
+</nav>
 
-    <!-- Mobile Nav -->
-    <ul class="sidenav" id="mobile-demo">
-        <li class="indigo darken-4 white-text" style="padding: 20px;"><b>RCCR Menu</b></li>
-    </ul>
+<div class="page-header">
+    <h1 id="page-title">Loading...</h1>
+</div>
 
-    <!-- Dropdown for excess links -->
-    <ul id="dropdown-more" class="dropdown-content"></ul>
-
-    <main>
-        <section class="page-title-area">
-            <div class="container center-align">
-                <h4 id="page-title">Loading...</h4>
-                <div class="sub-header">Rabbinical Council of The Charles River</div>
-            </div>
-        </section>
-
-        <div class="container">
-            <div id="error-report"></div>
-
-            <div class="row">
-                <!-- Main Content Left -->
-                <div class="col s12 m9">
-                    <div class="card-panel main-card z-depth-1">
-                        <div id="page-content">
-                            <div class="progress indigo lighten-4">
-                                <div class="indeterminate indigo"></div>
-                            </div>
+<div class="section-fluid bg-grey">
+    <div class="container-fluid">
+        <div id="error-report" class="alert alert-danger mb-4"></div>
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <div class="content-panel">
+                    <div id="page-content">
+                        <div class="text-center py-4">
+                            <div class="spinner-border" style="color:#c8a850;"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Sidebar Right -->
-                <div class="col s12 m3">
-                    <div class="card indigo darken-4">
-                        <div class="card-content white-text">
-                            <span class="card-title" style="font-size: 1.2rem;">Support</span>
-                            <p style="font-size: 0.85rem; opacity: 0.8;">Your contributions support our community kashrus efforts.</p>
-                        </div>
-                        <div class="card-action">
-                            <a href="mailto:donations@rebchardle.org" class="amber-text">Donate Now</a>
-                        </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="sidebar-dark">
+                    <h5>Quick Links</h5>
+                    <div id="side-nav-links">
+                        <a href="index.html" class="sidebar-link">Home</a>
                     </div>
-
-                    <ul class="collection with-header z-depth-1" id="side-nav-links" style="border-radius: 8px;">
-                        <li class="collection-header"><h6>Resources</h6></li>
-                    </ul>
+                </div>
+                <div class="sidebar-dark">
+                    <h5>Support the RCCR</h5>
+                    <p style="opacity:.75; font-size:14px; margin-bottom:16px;">Your contributions support our community kashrus efforts.</p>
+                    <a href="donate.html" class="btn btn-gold w-100 py-2">Donate Now</a>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
+</div>
 
-    <!-- Footer -->
-    <footer class="page-footer">
-        <div class="container">
-            <div class="row">
-                <div class="col l6 s12">
-                    <h5 class="white-text">RCCR</h5>
-                    <p class="grey-text text-lighten-4">Excellence in Halachic Leadership and Community Service.</p>
-                </div>
-                <div class="col l4 offset-l2 s12">
-                    <h5 class="white-text">Administrative</h5>
-                    <ul>
-                        <li><a class="grey-text text-lighten-3" href="admin.html">Admin Login</a></li>
-                    </ul>
-                </div>
-            </div>
+<footer class="footer">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <h5>Rabbinical Council of The Charles River</h5>
+            <p style="opacity:.65; font-size:14px;">Serving the Jewish community with dedication and excellence.</p>
         </div>
-        <div class="footer-copyright">
-            <div class="container">
-                © <span id="year"></span> RCCR | Powered by Shebo Enterprises
-            </div>
+        <div class="col-md-6 text-md-end">
+            <a href="admin.html" style="font-size:13px;">Admin Login</a>
         </div>
-    </footer>
+    </div>
+    <div class="footer-bottom text-center">
+        <small style="opacity:.5;">&copy; <span id="year"></span> RCCR &nbsp;|&nbsp; Powered by Shebo Enterprises</small>
+    </div>
+</footer>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-    <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+        authDomain: "rccr-main.firebaseapp.com",
+        projectId: "rccr-main",
+        storageBucket: "rccr-main.firebasestorage.app",
+        messagingSenderId: "221328154434",
+        appId: "1:221328154434:web:a6000a45f5d4ba964532db"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
-            authDomain: "rccr-main.firebaseapp.com",
-            projectId: "rccr-main",
-            storageBucket: "rccr-main.firebasestorage.app",
-            messagingSenderId: "221328154434",
-            appId: "1:221328154434:web:a6000a45f5d4ba964532db"
-        };
+    function reportError(msg) {
+        const box = document.getElementById('error-report');
+        box.style.display = 'block'; box.textContent = msg;
+    }
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    function loadNav() {
+        db.collection('links').orderBy('order').get().then(qs => {
+            const nav = document.getElementById('nav-links');
+            const side = document.getElementById('side-nav-links');
+            side.innerHTML = '<a href="index.html" class="sidebar-link">Home</a>';
+            qs.forEach(doc => {
+                const l = doc.data();
+                const tb = l.targetBlank ? 'target="_blank" rel="noopener"' : '';
+                nav.innerHTML += `<li class="nav-item"><a class="nav-link" href="${l.url}" ${tb}>${l.text}</a></li>`;
+                side.innerHTML += `<a href="${l.url}" class="sidebar-link" ${tb}>${l.text}</a>`;
+            });
+        }).catch(err => reportError('Nav error: ' + err.message));
+    }
 
-        function reportError(msg) {
-            const box = document.getElementById('error-report');
-            box.style.display = 'block';
-            box.innerHTML = `<b>Status:</b> ${msg}`;
+    function loadPage() {
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        const titleEl = document.getElementById('page-title');
+        const contentEl = document.getElementById('page-content');
+
+        if (!slug) {
+            titleEl.textContent = 'Information';
+            contentEl.innerHTML = '<p class="text-muted">Please select a page from the menu.</p>';
+            return;
         }
 
-        function getParam(name) {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(name) || '';
-        }
-
-        // Navigation Loader
-        function loadNav() {
-            db.collection('links').orderBy('order').get().then(qs => {
-                const navLinks = document.getElementById('nav-links');
-                const sideLinks = document.getElementById('side-nav-links');
-                const mobileLinks = document.getElementById('mobile-demo');
-                const dropdown = document.getElementById('dropdown-more');
-
-                let count = 0;
-                qs.forEach(doc => {
-                    const l = doc.data();
-                    const liHtml = `<li><a href="${l.url}" ${l.targetBlank ? 'target="_blank"' : ''}>${l.text}</a></li>`;
-                    
-                    mobileLinks.innerHTML += liHtml;
-                    sideLinks.innerHTML += `<li class="collection-item"><a href="${l.url}">${l.text}</a></li>`;
-
-                    if (count < 5) {
-                        navLinks.innerHTML += liHtml;
-                    } else {
-                        if (count === 5) {
-                            navLinks.innerHTML += `<li><a class="dropdown-trigger" href="#!" data-target="dropdown-more">More <i class="material-icons right">arrow_drop_down</i></a></li>`;
-                        }
-                        dropdown.innerHTML += liHtml;
-                    }
-                    count++;
-                });
-
-                M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), { coverTrigger: false });
-                M.Sidenav.init(document.querySelectorAll('.sidenav'));
-            }).catch(err => reportError('Links failed: ' + err.message));
-        }
-
-        // Page Content Loader
-        function loadPage() {
-            const slug = getParam('slug');
-            const titleEl = document.getElementById('page-title');
-            const contentEl = document.getElementById('page-content');
-
-            if (!slug) {
-                titleEl.textContent = "Information";
-                contentEl.innerHTML = "<p>Please select a page from the menu.</p>";
+        db.collection('pages').where('slug', '==', slug).limit(1).get().then(qs => {
+            if (qs.empty) {
+                titleEl.textContent = 'Not Found';
+                contentEl.innerHTML = '<p>The requested page could not be found.</p>';
                 return;
             }
+            const page = qs.docs[0].data();
+            titleEl.textContent = page.title || slug;
+            document.title = (page.title || slug) + ' | RCCR';
+            contentEl.innerHTML = page.contentHtml || '<p>No content yet.</p>';
+        }).catch(err => { reportError('Error: ' + err.message); titleEl.textContent = 'Error'; });
+    }
 
-            db.collection('pages').where('slug', '==', slug).limit(1).get().then(qs => {
-                if (qs.empty) {
-                    titleEl.textContent = "Not Found";
-                    contentEl.innerHTML = "<p>The requested page could not be found.</p>";
-                    return;
-                }
-                const page = qs.docs[0].data();
-                titleEl.textContent = page.title || slug;
-                contentEl.innerHTML = page.contentHtml || '<p>No content provided.</p>';
-            }).catch(err => {
-                reportError('Page Error: ' + err.message);
-                titleEl.textContent = "Error Loading";
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadNav();
-            loadPage();
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', () => { loadNav(); loadPage(); });
+</script>
 </body>
 </html>

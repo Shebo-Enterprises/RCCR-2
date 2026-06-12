@@ -1,139 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon" >
-<style>
-table {
-    display: table;
-    border-collapse: separate;
-    border-spacing: 2px;
-    border-color: white;
-}
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    width: 200 px;
-    background-color: #ffffff;
-}
-li a {
-    display: block;
-    color: #000;
-    padding: 8px 16px;
-    text-decoration: none;
-    font-family: verdana;
-    text-align: left;
-}
-/* change the link color on hover */
-li a:hover {
-    background-color: #555;
-    color: white;
-}
-</style>
-<title>Parnes Hashvua</title>
-<META NAME="keywords" CONTENT="   Boston Judaism Sabbath Brookline Newton Brighton Allston Nonantum Sacred Space Synagogue RCCR">
-<script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GOOGLE_ANALYTICS_ID"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'YOUR_GOOGLE_ANALYTICS_ID');
-</script>
-<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sponsor Parnes Hashvua | RCCR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { font: 400 15px Lato, sans-serif; line-height: 1.8; color: #818181; }
+        h2 { font-size: 24px; text-transform: uppercase; color: #303030; font-weight: 600; margin-bottom: 20px; }
+        .navbar { background-color: #0f2747; border-bottom: 3px solid #c8a850; font-family: Montserrat, sans-serif; font-size: 12px; letter-spacing: 4px; padding: .75rem 1rem; }
+        .navbar-brand img { height: 36px; margin-right: 8px; }
+        .navbar-nav .nav-link { color: #fff !important; }
+        .navbar-nav .nav-link:hover { color: #c8a850 !important; background-color: #fff !important; }
+        .page-header { background: #0f2747; color: white; padding: 80px 50px 50px; border-bottom: 3px solid #c8a850; font-family: Montserrat, sans-serif; margin-top: 56px; }
+        .page-header h1 { font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
+        .section-fluid { padding: 70px 50px; }
+        @media (max-width: 767px) { .section-fluid { padding: 50px 20px; } .page-header { padding: 70px 20px 40px; } }
+        .bg-grey { background-color: #f6f6f6; }
+        .iframe-card { background: white; border-top: 4px solid #c8a850; box-shadow: 0 2px 10px rgba(0,0,0,.08); overflow: hidden; }
+        .sidebar-dark { background: #0f2747; color: white; padding: 25px; margin-bottom: 20px; }
+        .sidebar-dark h5 { color: #c8a850; font-family: Montserrat, sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; }
+        .sidebar-link { color: rgba(255,255,255,.7); text-decoration: none; display: block; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.1); font-size: 14px; }
+        .sidebar-link:hover { color: #c8a850; }
+        .footer { background-color: #0f2747; color: white; padding: 40px 50px 20px; border-top: 3px solid #c8a850; }
+        .footer h5 { font-family: Montserrat, sans-serif; text-transform: uppercase; letter-spacing: 3px; color: #c8a850; font-size: 13px; margin-bottom: 15px; }
+        .footer a { color: rgba(255,255,255,.65); text-decoration: none; }
+        .footer a:hover { color: #c8a850; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,.12); padding-top: 15px; margin-top: 25px; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
-<body bgcolor="white">
-<table width="100%" cellpadding="4" border="0">
-<tr>
-    <td valign="top" width="75%">
-        <div style="font-family: verdana; font-weight:bold; font-size: 24px;">Rabbinical Council of The Charles River    </div>
-    </td>
-    <td valign="right" width="25%">
-        <img style="max-width: 100%; height: auto;" src="Rabbinical Council (1) (1).png" alt="Rabbinical Council Logo">
-    </td>
-<tr>
-    <td align="center" colspan="2">
-        <div style="font-family: verdana; font-size:20px; font-weight:bold; width=300px;">Serving the community</div>
-    </td>
-</tr>
-<tr>
-    <td colspan="2">
-        <hr size="5" style="color: #0000FF">
-    </td>
-</tr>
-</table>
-<table>
-<tr><td colspan="3" align="right"><font size="-1" face="Arial">
+<body>
 
-</font></td>
-</tr>
-<tr>
-<td width="10%" align="center" valign="top">
-<ul id="sidebar-links">
-  </ul>
-</td>
-<td colspan="2" valign="top">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="Rabbinical Council (1) (1).png" alt="RCCR" onerror="this.style.display='none'">
+            RCCR
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto" id="nav-links"></ul>
+        </div>
+    </div>
+</nav>
 
-<div style="font-family: verdana; font-size: 16px;">
-<b><h1>Parnes Hashvuas</h1>
-</b><iframe src="https://kiddushware.netlify.app/app/public-form.html?formId=tWzD4R9w7ZfC8kX5pS6q&token=K_U0MDU4V0tKSlZUMUowUTlHT1VaNVc4OEVaUVVUTkU" width="100%" height="800px" style="border:none;"></iframe>
+<div class="page-header">
+    <h1>Sponsor a Week</h1>
+    <p style="opacity:.75; margin:0;">Dedicate a week of the Parnes Hashvua in honor or memory of a loved one.</p>
 </div>
-</td>
-</tr>
-</table>
-<hr size="2" style="color: #0000FF">
-<p>
-<font size="-2" face="verdana" >
-Rabbinical Council of The Charles River - info@rebchardle.org
-</font>
-<script>
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
-        // YOUR FIREBASE CONFIG
-        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
-  authDomain: "rccr-main.firebaseapp.com",
-  projectId: "rccr-main",
-  storageBucket: "rccr-main.firebasestorage.app",
-  messagingSenderId: "221328154434",
-  appId: "1:221328154434:web:a6000a45f5d4ba964532db",
-  measurementId: "G-97BBMTGDR0"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    function renderSidebarLinks() {
-        const ul = document.getElementById('sidebar-links');
-        if (!ul) {
-            console.error('Sidebar links UL not found!');
-            return;
-        }
-        // Always include a Home link as the first item
-        ul.innerHTML = '<li><a href=\"index.html\">Home</a></li>'; 
-        
-        db.collection('sidebarLinks').orderBy('order').get().then(qs => {
-            if (qs.empty) {
-                return;
-            }
+<div class="section-fluid bg-grey">
+    <div class="container-fluid">
+        <div class="row g-5">
+            <div class="col-lg-9">
+                <h2>Sponsorship Form</h2>
+                <div class="iframe-card">
+                    <iframe
+                        src="https://kiddushware.netlify.app/app/public-form.html?formId=tWzD4R9w7ZfC8kX5pS6q&token=K_U0MDU4V0tKSlZUMUowUTlHT1VaNVc4OEVaUVVUTkU"
+                        width="100%" height="800" style="border:none; display:block;"
+                        title="Sponsor Form">
+                    </iframe>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="sidebar-dark">
+                    <h5>Quick Links</h5>
+                    <div id="side-nav-links">
+                        <a href="index.html" class="sidebar-link">Home</a>
+                        <a href="parnes-hashvua.html" class="sidebar-link">Parnes Hashvua</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <h5>Rabbinical Council of The Charles River</h5>
+            <p style="opacity:.65; font-size:14px;">info@rebchardle.org</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="admin.html" style="font-size:13px;">Admin Login</a>
+        </div>
+    </div>
+    <div class="footer-bottom text-center">
+        <small style="opacity:.5;">&copy; <span id="year"></span> RCCR &nbsp;|&nbsp; Powered by Shebo Enterprises</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+        authDomain: "rccr-main.firebaseapp.com",
+        projectId: "rccr-main",
+        storageBucket: "rccr-main.firebasestorage.app",
+        messagingSenderId: "221328154434",
+        appId: "1:221328154434:web:a6000a45f5d4ba964532db"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    function loadNav() {
+        db.collection('links').orderBy('order').get().then(qs => {
+            const nav = document.getElementById('nav-links');
+            const side = document.getElementById('side-nav-links');
+            side.innerHTML = '<a href="index.html" class="sidebar-link">Home</a><a href="parnes-hashvua.html" class="sidebar-link">Parnes Hashvua</a>';
             qs.forEach(doc => {
                 const l = doc.data();
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.textContent = l.text;
-                a.href = l.url;
-                if (l.targetBlank) { a.target = '_blank'; a.rel = 'noopener'; }
-                li.appendChild(a);
-                ul.appendChild(li);
+                const tb = l.targetBlank ? 'target="_blank" rel="noopener"' : '';
+                nav.innerHTML += `<li class="nav-item"><a class="nav-link" href="${l.url}" ${tb}>${l.text}</a></li>`;
+                side.innerHTML += `<a href="${l.url}" class="sidebar-link" ${tb}>${l.text}</a>`;
             });
-        }).catch(err => {
-            console.error('Error loading links:', err);
-            ul.innerHTML = '<li>Error loading links</li>';
         });
     }
-
-    document.addEventListener('DOMContentLoaded', renderSidebarLinks);
+    document.addEventListener('DOMContentLoaded', loadNav);
 </script>
 </body>
 </html>

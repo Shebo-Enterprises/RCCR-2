@@ -2,286 +2,321 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RCCR | Rabbinical Council of The Charles River</title>
-    
-    <!-- Materialize CSS & Google Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        :root { --rccr-blue: #1a237e; }
-        
-        body { display: flex; min-height: 100vh; flex-direction: column; background-color: #fafafa; }
-        main { flex: 1 0 auto; }
+        body { font: 400 15px Lato, sans-serif; line-height: 1.8; color: #818181; }
+        h2 { font-size: 24px; text-transform: uppercase; color: #303030; font-weight: 600; margin-bottom: 30px; }
+        h4 { font-size: 19px; line-height: 1.375em; color: #303030; font-weight: 400; margin-bottom: 30px; }
 
-        /* Navbar Logic */
-        nav { background-color: var(--rccr-blue); box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .brand-logo { display: flex; align-items: center; font-weight: 300; }
-        .brand-logo img { height: 40px; margin-right: 15px; }
+        /* Navbar */
+        .navbar {
+            background-color: #0f2747;
+            border-bottom: 3px solid #c8a850;
+            font-family: Montserrat, sans-serif;
+            font-size: 12px;
+            letter-spacing: 4px;
+            border-radius: 0;
+            padding: .75rem 1rem;
+        }
+        .navbar-brand img { height: 36px; margin-right: 8px; }
+        .navbar-nav .nav-link { color: #fff !important; padding: .5rem 1rem; }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: #c8a850 !important;
+            background-color: #fff !important;
+        }
+        .navbar-toggler { border-color: transparent; }
 
-        /* Hero / Header */
-        .page-title-area { background: #fff; padding: 40px 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 30px; }
-        
-        /* Fluid Cards */
-        #feature-container {
-            column-count: 3;
-            column-gap: 20px;
+        /* Hero / Jumbotron */
+        .jumbotron {
+            background: linear-gradient(rgba(15,39,71,.88),rgba(15,39,71,.88)),
+                url("https://images.unsplash.com/photo-1511818966892-d7d671e672a2?w=1400");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 120px 25px;
+            font-family: Montserrat, sans-serif;
+            text-align: center;
         }
-        .feature-item {
-            break-inside: avoid;
-            margin-bottom: 20px;
-            display: inline-block;
-            width: 100%;
-        }
-        .card { margin: 0; transition: transform 0.2s; border-radius: 8px; }
-        .card:hover { transform: translateY(-3px); }
-        
-        /* Image Logic */
-        .card-image img { border-radius: 8px 8px 0 0; }
-        .img-hide { display: none !important; }
+        .jumbotron h1 { font-size: clamp(1.8rem,5vw,3rem); font-weight: 700; }
+        .jumbotron p { font-size: 1.1rem; opacity: .88; }
 
-        /* Sidebar & Navigation */
-        .collection .collection-item { color: var(--rccr-blue); }
-        
-        /* Error Reporting UI */
-        #error-report {
-            display: none;
-            background: #ffcdd2;
-            color: #b71c1c;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-family: monospace;
-        }
+        /* Sections */
+        .section-fluid { padding: 70px 50px; }
+        @media (max-width: 767px) { .section-fluid { padding: 50px 20px; } }
+        .bg-grey { background-color: #f6f6f6; }
 
-        @media (max-width: 992px) {
-            #feature-container { column-count: 2; }
+        /* Service cards */
+        .service-card {
+            background: white;
+            border-top: 4px solid #c8a850;
+            border-radius: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            padding: 30px 25px;
+            height: 100%;
+            transition: box-shadow .3s;
         }
-        @media (max-width: 600px) {
-            #feature-container { column-count: 1; }
-        }
+        .service-card:hover { box-shadow: 5px 0 30px rgba(0,0,0,.15); }
+        .service-card img { width: 100%; height: 180px; object-fit: cover; margin-bottom: 15px; }
+        .service-icon { font-size: 42px; color: #c8a850; margin-bottom: 15px; display: block; }
+
+        /* News items */
+        .news-card { background: white; border-top: 4px solid #0f2747; padding: 20px; margin-bottom: 15px; box-shadow: 0 1px 6px rgba(0,0,0,.07); }
+        .news-card .label { display: inline-block; background: #c8a850; color: white; font-size: 10px; letter-spacing: 2px; padding: 2px 8px; margin-bottom: 8px; font-family: Montserrat, sans-serif; text-transform: uppercase; }
+        .news-card h5 { color: #303030; font-weight: 600; margin-bottom: 6px; }
+        .news-img { width: 80px; height: 65px; object-fit: cover; flex-shrink: 0; }
+
+        /* Sidebar */
+        .sidebar-dark { background: #0f2747; color: white; padding: 25px; }
+        .sidebar-dark h5 { color: #c8a850; font-family: Montserrat, sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; }
+        .sidebar-link { color: rgba(255,255,255,.7); text-decoration: none; display: block; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.1); font-size: 14px; }
+        .sidebar-link:hover { color: #c8a850; }
+
+        /* Buttons */
+        .btn-gold { background: #c8a850; color: white; border: none; font-family: Montserrat, sans-serif; letter-spacing: 2px; font-size: 12px; }
+        .btn-gold:hover { background: #b2933e; color: white; border: 1px solid #c8a850; }
+        .btn-navy { background: #0f2747; color: white; border: none; font-family: Montserrat, sans-serif; letter-spacing: 2px; font-size: 12px; }
+        .btn-navy:hover { background: white; color: #0f2747; border: 1px solid #0f2747; }
+
+        /* Footer */
+        .footer { background-color: #0f2747; color: white; padding: 40px 0 20px; border-top: 3px solid #c8a850; }
+        .footer h5 { font-family: Montserrat, sans-serif; text-transform: uppercase; letter-spacing: 3px; color: #c8a850; font-size: 13px; margin-bottom: 15px; }
+        .footer a { color: rgba(255,255,255,.65); text-decoration: none; }
+        .footer a:hover { color: #c8a850; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,.12); padding-top: 15px; margin-top: 30px; font-size: 12px; }
+
+        #error-alert { display: none; }
     </style>
 
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
 </head>
-<body>
+<body data-bs-spy="scroll" data-bs-target=".navbar">
 
-    <!-- Fixed Navbar -->
-    <div class="navbar-fixed">
-        <nav>
-            <div class="nav-wrapper container">
-                <a href="#" class="brand-logo">
-                    <img src="Rabbinical Council (1) (1).png" alt="RCCR" onerror="this.style.display='none'">
-                    <span class="hide-on-small-only"></span>
-                </a>
-                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-                
-                <!-- This list will be split into main nav + a "More" dropdown if it's too long -->
-                <ul class="right hide-on-med-and-down" id="nav-links"></ul>
-            </div>
-        </nav>
+<!-- ── Navbar ── -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="index.html">
+            <img src="Rabbinical Council (1) (1).png" alt="RCCR" onerror="this.style.display='none'">
+            RCCR
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto" id="nav-links"></ul>
+        </div>
     </div>
+</nav>
 
-    <!-- Mobile Sidebar -->
-    <ul class="sidenav" id="mobile-demo">
-        <li class="indigo darken-4 white-text" style="padding: 20px;"><b>RCCR Menu</b></li>
-    </ul>
+<!-- ── Hero / Jumbotron ── -->
+<div class="jumbotron" style="margin-top:56px;">
+    <h1>Rabbinical Council<br>of The Charles River</h1>
+    <p class="mt-3 mb-4">Serving the Jewish community with Torah leadership,<br>kashrus supervision, and rabbinical guidance.</p>
+    <a href="donate.html" class="btn btn-gold btn-lg me-2 px-4 py-2">Support Us</a>
+    <a href="contact.html" class="btn btn-outline-light btn-lg px-4 py-2">Contact the Council</a>
+</div>
 
-    <main>
-        <section class="page-title-area">
-            <div class="container center-align">
-                <h4 class="indigo-text text-darken-4" style="font-weight: 700;">Rabbinical Council of The Charles River</h4>
-                <p class="grey-text text-darken-1 flow-text">Excellence in Halachic Leadership and Community Service</p>
-            </div>
-        </section>
+<!-- Error bar -->
+<div class="container-fluid px-5 pt-3">
+    <div id="error-alert" class="alert alert-danger alert-dismissible"></div>
+</div>
 
-        <div class="container">
-            <!-- Global Error Display -->
-            <div id="error-report"></div>
-
-            <div class="row">
-                <!-- Content Area -->
-                <div class="col s12 m9">
-                    <div id="feature-container">
-                        <!-- Loaded from Firestore -->
-                    </div>
-
-                    <div class="section">
-                        <h5 class="indigo-text"><i class="material-icons left">rss_feed</i>Latest Updates</h5>
-                        <div id="news-container"></div>
-                    </div>
+<!-- ── Community Resources ── -->
+<div class="section-fluid">
+    <div class="container-fluid">
+        <h2 class="text-center">Community Resources</h2>
+        <h4 class="text-center">What we offer</h4>
+        <div id="feature-container" class="row g-4 mt-2">
+            <div class="col-md-4">
+                <div class="service-card">
+                    <i class="bi bi-book service-icon"></i>
+                    <h4>Kosher Certification</h4>
+                    <p>RCCR provides rigorous kosher certification and ongoing supervision for establishments throughout the greater Boston area.</p>
+                    <a href="kosher.html" class="btn btn-navy btn-sm px-3 py-2">Learn More</a>
                 </div>
-
-                <!-- Action Sidebar -->
-                <div class="col s12 m3">
-                    <div class="card indigo darken-4">
-                        <div class="card-content white-text">
-                            <span class="card-title">Support</span>
-                            <p>Contributions allow the RCCR to maintain its high standards of community kashrus and support.</p>
-                        </div>
-                        <div class="card-action">
-                            <a href="mailto:donations@rebchardle.org" class="amber-text">Donate via Wire</a>
-                        </div>
-                    </div>
-
-                    <ul class="collection with-header z-depth-1" id="side-nav-links">
-                        <li class="collection-header"><h6>Quick Links</h6></li>
-                    </ul>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card">
+                    <i class="bi bi-building service-icon"></i>
+                    <h4>Beth Din</h4>
+                    <p>Our rabbinical court provides halachic adjudication, mediation, and consultation for the community.</p>
+                    <a href="beth-din.html" class="btn btn-navy btn-sm px-3 py-2">View Docket</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card">
+                    <i class="bi bi-people service-icon"></i>
+                    <h4>Community Support</h4>
+                    <p>From the Parnes Hashvua program to the KRCKA financial subsidy, we support community members in need.</p>
+                    <a href="subsidy.html" class="btn btn-navy btn-sm px-3 py-2">Apply for Subsidy</a>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
+</div>
 
-    <footer class="page-footer grey darken-4">
-        <div class="container">
-            <div class="row">
-                <div class="col l6 s12">
-                    <h5 class="white-text">RCCR</h5>
-                    <p class="grey-text text-lighten-4">Serving the community since now.</p>
+<!-- ── Firebase Feature Boxes ── -->
+<div id="firebase-features-section" class="section-fluid bg-grey" style="display:none;">
+    <div class="container-fluid">
+        <h2 class="text-center">From the RCCR</h2>
+        <div id="firebase-feature-container" class="row g-4 mt-2"></div>
+    </div>
+</div>
+
+<!-- ── Latest Updates + Sidebar ── -->
+<div class="section-fluid">
+    <div class="container-fluid">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <h2>Latest Updates</h2>
+                <div id="news-container">
+                    <p class="text-muted">Loading updates...</p>
                 </div>
-                <div class="col l4 offset-l2 s12">
-                    <h5 class="white-text">Administrative</h5>
-                    <ul>
-                        <li><a class="grey-text text-lighten-3" href="admin.html">Admin Login</a></li>
-                    </ul>
+            </div>
+            <div class="col-lg-4">
+                <div class="sidebar-dark mb-4">
+                    <h5>Support the RCCR</h5>
+                    <p style="opacity:.8; font-size:14px; margin-bottom:18px;">Your contributions allow us to maintain the highest standards of community kashrus and service.</p>
+                    <a href="donate.html" class="btn btn-gold w-100 py-2">Donate Now</a>
+                </div>
+                <div class="sidebar-dark">
+                    <h5>Quick Links</h5>
+                    <div id="side-nav-links">
+                        <a href="index.html" class="sidebar-link">Home</a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="footer-copyright">
-            <div class="container">
-                © <span id="year"></span> RCCR | Powered by Shebo Enterprises
+    </div>
+</div>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    <div class="container-fluid section-fluid" style="padding-top:40px; padding-bottom:20px;">
+        <div class="row g-4">
+            <div class="col-md-5">
+                <h5>Rabbinical Council of The Charles River</h5>
+                <p style="opacity:.65; font-size:14px;">Serving the Jewish community with dedication, integrity, and excellence in halachic leadership.</p>
+                <p style="font-size:13px;"><a href="mailto:info@rebchardle.org">info@rebchardle.org</a></p>
+            </div>
+            <div class="col-md-4">
+                <h5>Site Links</h5>
+                <ul id="footer-links" class="list-unstyled" style="font-size:14px;"></ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Administrative</h5>
+                <ul class="list-unstyled" style="font-size:14px;">
+                    <li><a href="admin.html">Admin Login</a></li>
+                </ul>
             </div>
         </div>
-    </footer>
+        <div class="footer-bottom text-center">
+            <p class="mb-0" style="opacity:.5; font-size:12px;">
+                &copy; <span id="year"></span> RCCR &nbsp;|&nbsp; Powered by Shebo Enterprises
+            </p>
+        </div>
+    </div>
+</footer>
 
-    <!-- Dropdown Template for "More" menu -->
-    <ul id="dropdown-more" class="dropdown-content"></ul>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
 
-    <!-- Materialize JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
+        authDomain: "rccr-main.firebaseapp.com",
+        projectId: "rccr-main",
+        storageBucket: "rccr-main.firebasestorage.app",
+        messagingSenderId: "221328154434",
+        appId: "1:221328154434:web:a6000a45f5d4ba964532db"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
+    function reportError(col, msg) {
+        const box = document.getElementById('error-alert');
+        box.style.display = 'block';
+        box.innerHTML += `<strong>[${col}]:</strong> ${msg}<br>`;
+    }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDa-q7h7VTuHxffftGK44NhKKfLt0w8qjM",
-            authDomain: "rccr-main.firebaseapp.com",
-            projectId: "rccr-main",
-            storageBucket: "rccr-main.firebasestorage.app",
-            messagingSenderId: "221328154434",
-            appId: "1:221328154434:web:a6000a45f5d4ba964532db"
-        };
+    function loadNav() {
+        db.collection('links').orderBy('order').get().then(qs => {
+            const nav = document.getElementById('nav-links');
+            const side = document.getElementById('side-nav-links');
+            const footer = document.getElementById('footer-links');
+            side.innerHTML = '<a href="index.html" class="sidebar-link">Home</a>';
+            footer.innerHTML = '<li><a href="index.html">Home</a></li>';
+            qs.forEach(doc => {
+                const l = doc.data();
+                const tb = l.targetBlank ? 'target="_blank" rel="noopener"' : '';
+                nav.innerHTML += `<li class="nav-item"><a class="nav-link" href="${l.url}" ${tb}>${l.text}</a></li>`;
+                side.innerHTML += `<a href="${l.url}" class="sidebar-link" ${tb}>${l.text}</a>`;
+                footer.innerHTML += `<li><a href="${l.url}" ${tb}>${l.text}</a></li>`;
+            });
+        }).catch(err => reportError('nav', err.message));
+    }
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    function loadFeatures() {
+        db.collection('featureBoxes').get().then(qs => {
+            const items = [];
+            qs.forEach(doc => items.push(doc.data()));
+            items.sort((a, b) => (a.order || 0) - (b.order || 0));
+            if (items.length === 0) return;
 
-        // Error helper
-        function reportError(col, msg) {
-            const box = document.getElementById('error-report');
-            box.style.display = 'block';
-            box.innerHTML += `<div><b>Error [${col}]:</b> ${msg}</div>`;
-        }
+            const section = document.getElementById('firebase-features-section');
+            const container = document.getElementById('firebase-feature-container');
+            section.style.display = 'block';
+            container.innerHTML = '';
+            items.forEach(fb => {
+                container.innerHTML += `
+                <div class="col-md-4">
+                    <div class="service-card">
+                        ${fb.imageUrl ? `<img src="${fb.imageUrl}" alt="" onerror="this.style.display='none'">` : ''}
+                        <h4>${fb.title || ''}</h4>
+                        <p>${fb.text || ''}</p>
+                        ${fb.linkText ? `<a href="${fb.linkUrl}" class="btn btn-navy btn-sm px-3 py-2">${fb.linkText}</a>` : ''}
+                    </div>
+                </div>`;
+            });
+        }).catch(err => reportError('features', err.message));
+    }
 
-        // NAVIGATION LOGIC (Fits unlimited menu options)
-        function loadNav() {
-            db.collection('links').orderBy('order').get().then(qs => {
-                const navLinks = document.getElementById('nav-links');
-                const sideLinks = document.getElementById('side-nav-links');
-                const mobileLinks = document.getElementById('mobile-demo');
-                const dropdown = document.getElementById('dropdown-more');
+    function loadNews() {
+        const container = document.getElementById('news-container');
+        db.collection('news').orderBy('timestamp', 'desc').limit(6).get().then(qs => {
+            container.innerHTML = '';
+            if (qs.empty) {
+                container.innerHTML = '<p class="text-muted">No updates yet.</p>';
+                return;
+            }
+            qs.forEach(doc => {
+                const n = doc.data();
+                container.innerHTML += `
+                <div class="news-card d-flex gap-3">
+                    <div class="flex-grow-1">
+                        <span class="label">Update</span>
+                        <h5>${n.title}</h5>
+                        <p class="mb-0">${n.snippet}</p>
+                    </div>
+                    ${n.imageUrl ? `<img src="${n.imageUrl}" class="news-img d-none d-sm-block" onerror="this.style.display='none'">` : ''}
+                </div>`;
+            });
+        }).catch(err => reportError('news', err.message));
+    }
 
-                let count = 0;
-                qs.forEach(doc => {
-                    const l = doc.data();
-                    const li = `<li><a href="${l.url}" ${l.targetBlank ? 'target="_blank"' : ''}>${l.text}</a></li>`;
-                    
-                    // Add to mobile and sidebar no matter what
-                    mobileLinks.innerHTML += li;
-                    sideLinks.innerHTML += `<li class="collection-item"><a href="${l.url}">${l.text}</a></li>`;
-
-                    // Handle Top Nav Overflow (Show 5 items, move rest to dropdown)
-                    if (count < 5) {
-                        navLinks.innerHTML += li;
-                    } else {
-                        if (count === 5) {
-                            navLinks.innerHTML += `<li><a class="dropdown-trigger" href="#!" data-target="dropdown-more">More <i class="material-icons right">arrow_drop_down</i></a></li>`;
-                        }
-                        dropdown.innerHTML += li;
-                    }
-                    count++;
-                });
-
-                // Re-init Materialize components after injection
-                M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), { coverTrigger: false });
-                M.Sidenav.init(document.querySelectorAll('.sidenav'));
-            }).catch(err => reportError('links', err.message));
-        }
-
-        // FEATURE BOXES (Masonry Effect)
-        function loadFeatures() {
-            const container = document.getElementById('feature-container');
-            db.collection("featureBoxes").get().then((qs) => {
-                container.innerHTML = '';
-                const items = [];
-                qs.forEach(doc => items.push(doc.data()));
-                items.sort((a,b) => (a.order || 0) - (b.order || 0));
-
-                items.forEach(fb => {
-                    const item = document.createElement('div');
-                    item.className = 'feature-item';
-                    item.innerHTML = `
-                        <div class="card z-depth-1" style="background-color: ${fb.backgroundColor || '#ffffff'}">
-                            ${fb.imageUrl ? `
-                            <div class="card-image">
-                                <img src="${fb.imageUrl}" onerror="this.parentElement.classList.add('img-hide')">
-                            </div>` : ''}
-                            <div class="card-content">
-                                <span class="card-title indigo-text text-darken-4" style="font-weight:600; font-size:1.2rem;">${fb.title || ''}</span>
-                                <p>${fb.text || ''}</p>
-                            </div>
-                            ${fb.linkText ? `
-                            <div class="card-action">
-                                <a href="${fb.linkUrl}" class="indigo-text"><b>${fb.linkText}</b></a>
-                            </div>` : ''}
-                        </div>`;
-                    container.appendChild(item);
-                });
-            }).catch(err => reportError('featureBoxes', err.message));
-        }
-
-        // NEWS LOGIC
-        function loadNews() {
-            const container = document.getElementById('news-container');
-            db.collection("news").orderBy("timestamp", "desc").limit(5).get().then((qs) => {
-                container.innerHTML = '';
-                qs.forEach((doc) => {
-                    const n = doc.data();
-                    container.innerHTML += `
-                        <div class="card horizontal z-depth-0" style="border-bottom: 1px solid #eee; background: transparent;">
-                            <div class="card-stacked">
-                                <div class="card-content" style="padding: 15px 0;">
-                                    <span class="grey-text" style="font-size:0.8rem">LATEST UPDATE</span>
-                                    <h6 style="margin:5px 0 0 0; font-weight:600;">${n.title}</h6>
-                                    <p>${n.snippet}</p>
-                                </div>
-                            </div>
-                            ${n.imageUrl ? `
-                            <div class="card-image hide-on-small-only" style="padding: 10px;">
-                                <img src="${n.imageUrl}" onerror="this.style.display='none'" style="width:100px; height:80px; object-fit:cover; border-radius:4px;">
-                            </div>` : ''}
-                        </div>`;
-                });
-            }).catch(err => reportError('news', err.message));
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadNav();
-            loadFeatures();
-            loadNews();
-        });
-    </script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadNav();
+        loadFeatures();
+        loadNews();
+    });
+</script>
 </body>
 </html>
